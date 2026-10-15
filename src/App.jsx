@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
+import FlightList from "./components/FlightList";
+import LiveMapTest from "./components/LiveMapTest";
 
-import './App.css';
+import "./App.css";
 
 function App() {
-  const [message, setMessage] = useState('');
   const [flights, setFlights] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const workerRef = useRef(null);
@@ -12,28 +13,26 @@ function App() {
   useEffect(() => {
     // Initialize worker for data processing
     workerRef.current = new Worker(
-      new URL('./workers/dataProcessor.worker.js', import.meta.url),
-      { type: 'module'},
+      new URL("./workers/dataProcessor.worker.js", import.meta.url),
+      { type: "module" },
     );
 
     // Listen for processed data from worker
     workerRef.current.onmessage = (event) => {
-      if (event.data.type === 'DATA_PROCESSED') {
+      if (event.data.type === "DATA_PROCESSED") {
         setFlights(event.data.telemetry);
       }
     };
 
     // WebSocket logic wrapper
     const connectWebSocket = () => {
-      setMessage('Connecting to FastApi Websocket server...');
-      console.log('Connecting to FastApi Websocket server...');
+      console.log("Connecting to FastApi Websocket server...");
       // Open Websocker connection to BE
-      const ws = new WebSocket('ws://localhost:8000/ws');
+      const ws = new WebSocket("ws://localhost:8000/ws");
       wsRef.current = ws;
 
       ws.onopen = () => {
-        setMessage('Successful connection to FastApi Websocket server!');
-        console.log('Successful connection to FastApi Websocket server!');
+        console.log("Successful connection to FastApi Websocket server!");
         setIsConnected(true);
       };
 
@@ -49,8 +48,7 @@ function App() {
       };
 
       ws.onclose = () => {
-        setMessage('WebSocket closed. Reconnecting in 5 seconds...');
-        console.log('WebSocket closed. Reconnecting in 5 seconds...');
+        console.log("WebSocket closed. Reconnecting in 5 seconds...");
         setIsConnected(false);
         // Retry connection after 5 seconds to allow server to reboot
         setTimeout(() => {
@@ -60,13 +58,12 @@ function App() {
 
       ws.onerror = () => {
         // Suppress any noisy errors while server is booting up
-        setMessage('Waiting for server...');
-        console.log('Waiting for server...');
+        console.log("Waiting for server...");
       };
     };
 
     connectWebSocket();
-    
+
     // Clean up on unmount
     return () => {
       if (wsRef.current) {
@@ -78,20 +75,59 @@ function App() {
     };
   }, []);
 
-  if (isConnected) {
-    console.log(flights)
-  }
-
   return (
     <>
-      <section id="center">
-        <div>
-          <h1>Hello, world!</h1>
-          <h2>{message}</h2>
-        </div>
-      </section>
+      
+      <div
+        style={{
+          boxSizing: "border-box",
+          display: "flex",
+          height: "100vh",
+          maxHeight: "100vh",
+          overflow: "hidden",
+          position: "relative",
+          width: "100vw",
+        }}
+      >
+        {flights && isConnected && flights.length > 0 ? (
+          <>
+            <div
+              style={{
+                borderRight: "1px solid #ccc",
+                boxSizing: "border-box",
+                height: "100%",
+                width: "30%",
+              }}
+            >
+              <h3 style={{ margin: '5px 0 12px 5px', fontFamily: 'sans-serif' }}>Live Aircraft Ingestion ({flights.length})</h3>
+              <FlightList flights={flights} />
+            </div>
+            <div
+              style={{
+                boxSizing: "border-box",
+                height: "100%",
+                position: "relative",
+                width: "70%",
+              }}
+            >
+              {/* <FlightMap flights={flights} /> */}
+            </div>
+          </>
+        ) : (
+          <div
+            style={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            Loading...
+          </div>
+        )}
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
