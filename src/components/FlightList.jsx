@@ -7,7 +7,7 @@ export default function FlightList({ flights }) {
   // List renders correctly, safe to disable lint error
   // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
-    count: 100, // TEMP 1000
+    count: 100, // TEMP
     getScrollElement: () => parentRef.current,
     estimateSize: () => 60,
     overscan: 5,
@@ -16,7 +16,7 @@ export default function FlightList({ flights }) {
   return (
     <div
       ref={parentRef}
-      className="LiveListContainer"
+      className="FlightListContainer"
       style={{
         height: "calc(100% - 45px)", // add space for header
         overflow: "auto",
@@ -68,8 +68,8 @@ export default function FlightList({ flights }) {
                 }}
               >
                 Alt: {Math.round(flight.altitude || 0)}m | Vel:{" "}
-                {Math.round(flight.velocity || 0)} km/h Long: {flight.longitude}{" "}
-                Lat: {flight.latitude}
+                {Math.round(flight.velocity || 0)} km/h | Long: {flight.longitude}{" "}
+                Lat: {flight.latitude} | Heading: {flight.heading}
               </div>
             </div>
           );

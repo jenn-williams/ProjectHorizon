@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import FlightList from "./components/FlightList";
-import LiveMapTest from "./components/LiveMapTest";
+import FlightMap from "./components/FlightMap";
 
 import "./App.css";
 
@@ -110,7 +110,7 @@ function App() {
                 width: "70%",
               }}
             >
-              {/* <FlightMap flights={flights} /> */}
+              <FlightMap flights={flights} />
             </div>
           </>
         ) : (

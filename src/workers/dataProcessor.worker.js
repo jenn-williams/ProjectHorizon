@@ -13,7 +13,7 @@ self.onmessage = (event) => {
             latitude: flight[6], // WGS-84 latitude in decimal degrees. Can be null.
             altitude: flight[7] || 'UNKNOWN', // Barometric altitude in meters. Can be null.
             velocity: flight[9] || 'UNKNOWN', // Velocity over ground in m/s. Can be null.
-            heading: flight[10] || 'UNKNOWN', // True track in decimal degrees clockwise from north (north=0°). Can be null.
+            heading: flight[10] || 0, // True track in decimal degrees clockwise from north (north=0°). Can be null.
             category: flight[17] || 'UNKNOWN', // Aircraft category, integer 0 - 20
         })).filter((f) => f.icao24 && f.longitude && f.latitude); // Make sure that only flights with valid coordinates and ICAO are included.
         // Send formatted data back to main thread
