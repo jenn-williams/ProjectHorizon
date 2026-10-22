@@ -33,6 +33,12 @@ export default function FlightList({ flights }) {
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const flight = flights[virtualRow.index] || null;
 
+          const lat = parseFloat(flight.latitude);
+          const lng = parseFloat(flight.longitude);
+          const heading = flight.heading !== null && flight.heading !== undefined ? Math.round(flight.heading || 0) : 0;
+          const altitude = flight.altitude !== null && flight.altitude !== undefined ? Math.round(flight.altitude || 0) : 0;
+          const velocity = flight.velocity !== null && flight.velocity !== undefined ? Math.round(flight.velocity || 0) : 0;
+
           // find better way to handle when actual count is above estimate
           // currently this causes extra space at the bottom of list when using
           // the live data
@@ -67,9 +73,8 @@ export default function FlightList({ flights }) {
                   paddingLeft: "5px",
                 }}
               >
-                Alt: {Math.round(flight.altitude || 0)}m | Vel:{" "}
-                {Math.round(flight.velocity || 0)} km/h | Long: {flight.longitude}{" "}
-                Lat: {flight.latitude} | Heading: {flight.heading}
+                Alt: {altitude}m | Vel: {velocity} km/h | Long: {isNaN(lng) ? 'N/A' : lng}{" "}
+                Lat: {isNaN(lat) ? 'N/A' : lat} | Heading: {heading}°
               </div>
             </div>
           );
