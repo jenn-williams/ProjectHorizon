@@ -49,3 +49,50 @@
 body {
   margin: 0;
 }
+
+/* Overwrites MapLibre's default white popup bubble wrapper containers */
+.flight-tooltip>.maplibregl-popup-content {
+  background: #1e293b;
+  /* Deep dark slate dashboard color */
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  padding: 10px;
+}
+
+.flight-tooltip>.maplibregl-popup-tip {
+  border: 6px solid transparent;
+}
+
+/* Colors the little structural tip anchor arrow pointing at your marker */
+.flight-tooltip.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-top-left .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
