@@ -6,6 +6,7 @@ import "./App.css";
 
 function App() {
   const [flights, setFlights] = useState([]);
+  const flightsCacheRef = useRef({}); // Keep cache of current flight data
   const [isConnected, setIsConnected] = useState(false);
   const workerRef = useRef(null);
   const wsRef = useRef(null);
@@ -21,6 +22,7 @@ function App() {
     workerRef.current.onmessage = (event) => {
       if (event.data.type === "DATA_PROCESSED") {
         setFlights(event.data.telemetry);
+        flightsCacheRef.current = event.data.cache;
       }
     };
 
@@ -110,7 +112,7 @@ function App() {
                 width: "70%",
               }}
             >
-              <FlightMap flights={flights} />
+              <FlightMap flights={flights} flightsCache={flightsCacheRef} />
             </div>
           </>
         ) : (

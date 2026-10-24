@@ -40,24 +40,14 @@ const createTooltipContent = (flight, heading) => {
       `;
 };
 
-export default function LiveMap({ flights }) {
+export default function LiveMap({ flights, flightsCache }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const tooltipRef = useRef(null);
-  const markersRef = useRef({}); // Fast pointer lookup hash for active markers
+  const markersRef = useRef({});
 
   const activeFlightIdRef = useRef(null); // Keep clicked flight ID in memory for tooltip updates
-  const flightsCacheRef = useRef({}); // Fast object hash lookup map
   const [isMapReady, setIsMapReady] = useState(false);
-
-  // Cache incoming flights immediately so map event listeners can always read fresh data
-  useEffect(() => {
-    const cache = {};
-    flights.forEach((f) => {
-      if (f.icao24) cache[f.icao24] = f;
-    });
-    flightsCacheRef.current = cache;
-  }, [flights]);
 
   // Mount the maplibregl container canvas once on initial load
   useEffect(() => {
@@ -92,11 +82,12 @@ export default function LiveMap({ flights }) {
           tooltipRef.current.remove();
           activeFlightIdRef.current = null; // clear memory
         }
+        return;
       }
 
       // if user clicks a marker, get the flight ID and corresponding flight data
       const targetId = target.getAttribute("data-flight-id");
-      const targetFlight = flightsCacheRef.current[targetId];
+      const targetFlight = flightsCache.current[targetId];
 
       if (!targetFlight) return;
 
@@ -125,7 +116,7 @@ export default function LiveMap({ flights }) {
     return () => {
       if (mapRef.current) mapRef.current.remove();
     };
-  }, []);
+  }, [flightsCache]);
 
   // Add/update incoming real-time markers outside main render step
   useEffect(() => {
