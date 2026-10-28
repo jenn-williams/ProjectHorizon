@@ -19,7 +19,7 @@ export default function FlightList({ flights }) {
       ref={parentRef}
       className="FlightListContainer"
       style={{
-        height: "calc(100% - 45px)", // add space for header
+        height: "100%",
         overflow: "auto",
         width: "100%",
       }}

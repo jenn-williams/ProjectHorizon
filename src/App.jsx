@@ -83,6 +83,8 @@ function App() {
         style={{
           boxSizing: "border-box",
           display: "flex",
+          flexDirection: "column",
+          fontFamily: "sans-serif",
           height: "100vh",
           maxHeight: "100vh",
           overflow: "hidden",
@@ -90,8 +92,59 @@ function App() {
           width: "100vw",
         }}
       >
+        <header
+          style={{
+            alignItems: "center",
+            // backgroundColor: "#000",
+            boxShadow: "0 2px 4px rgba(0,0,0,2)",
+            boxSizing: "border-box",
+            color: "#f8fafc",
+            display: "flex",
+            height: "60px",
+            justifyContent: "space-between",
+            padding: "0 20px",
+            width: "100%",
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <h1 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>
+              SkyTracker Ingestion Engine ({flights.length} Flights)
+            </h1>
+            <span
+              style={{
+                backgroundColor: isConnected ? "#10b981" : "#ef4444",
+                borderRadius: "50%",
+                display: "inline-block",
+                height: "10px",
+                width: "10px",
+              }}
+              title={isConnected ? "WebSocket Connected" : "Disconnected"}
+            />
+          </div>
+          <nav style={{ display: "flex", gap: "20px" }}>
+            <a
+              href="#"
+              style={{
+                color: "#94a3b8", // To do: add white on hover
+                textDecoration: "none",
+                fontWeight: "500",
+              }}
+            >
+              About
+            </a>
+          </nav>
+        </header>
         {flights && isConnected && flights.length > 0 ? (
-          <>
+          <div
+            style={{
+              display: "flex",
+              flex: 1,
+              height: "calc(100vh - 60px)",
+              position: "relative",
+              width: "100%",
+            }}
+          >
             <div
               style={{
                 borderRight: "1px solid #ccc",
@@ -100,11 +153,6 @@ function App() {
                 width: "30%",
               }}
             >
-              <h3
-                style={{ margin: "5px 0 12px 5px", fontFamily: "sans-serif" }}
-              >
-                Live Aircraft Ingestion ({flights.length})
-              </h3>
               <FlightList flights={flights} />
             </div>
             <div
@@ -117,7 +165,7 @@ function App() {
             >
               <FlightMap flights={flights} flightsCache={flightsCacheRef} />
             </div>
-          </>
+          </div>
         ) : (
           <div
             style={{
@@ -139,11 +187,7 @@ function App() {
                       x2="210"
                       y2="230"
                     >
-                      <stop
-                        offset="0%"
-                        stopColor="#334155"
-                        stopOpacity="0.1"
-                      />
+                      <stop offset="0%" stopColor="#334155" stopOpacity="0.1" />
                       <stop offset="100%" stopColor="#ffffff" />
                     </linearGradient>
                   </defs>
