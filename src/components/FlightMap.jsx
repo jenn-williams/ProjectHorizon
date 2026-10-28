@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+import { metersPerSecToMph, metersToFeet } from "../utils";
 
 const imagePath = `${import.meta.env.BASE_URL}dark_plane.svg`;
 
@@ -14,14 +15,10 @@ function updateFlightTelemetry(flightMarker, newLngLat, newHeading) {
 
 // Get dynamic tooltip content
 const createTooltipContent = (flight, heading) => {
-  const altitude =
-    flight.altitude !== null && flight.altitude !== undefined
-      ? Math.round(flight.altitude || 0)
-      : 0;
-  const velocity =
-    flight.velocity !== null && flight.velocity !== undefined
-      ? Math.round(flight.velocity || 0)
-      : 0;
+  const altitude = metersToFeet(flight.altitude || 0);
+  const velocity = metersPerSecToMph(flight.velocity || 0);
+
+  const flightRouteLink = flight.callsign ? `https://www.flightaware.com/live/flight/${flight.callsign}` : 'https://www.flightaware.com';
 
   // Tooltip content
   return `
@@ -31,14 +28,18 @@ const createTooltipContent = (flight, heading) => {
             <span style="color: #38bdf8; font-size: 11px;">${flight.icao24.toUpperCase()}</span>
           </div>
           <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-            <div>Speed: <span style="color: #e2e8f0;">${velocity} km/h</span></div>
-            <div>Altitude: <span style="color: #e2e8f0;">${altitude} m</span></div>
+            <div>Ground Speed: <span style="color: #e2e8f0;">${velocity} mph</span></div>
+            <div>Altitude: <span style="color: #e2e8f0;">${altitude} ft</span></div>
             <div>Heading: <span style="color: #e2e8f0;">${heading}°</span></div>
-            <div style="font-size: 10px; margin-top: 4px; font-style: italic;">Origin Country: ${flight.country || "Unknown"}</div>
+            <div style="font-size: 10px; margin-top: 4px; font-style: italic;">
+              <a href=${flightRouteLink} target="_blank" rel="noopener noreferrer" class="flight-route-link">
+                See Route on FlightAware
+              </a>
+            </div>
           </div>
         </div>
       `;
-};
+};;
 
 export default function LiveMap({ flights, flightsCache }) {
   const mapContainerRef = useRef(null);

@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { metersPerSecToMph, metersToFeet } from "../utils";
 
 export default function FlightList({ flights }) {
   const parentRef = useRef(null);
@@ -7,7 +8,7 @@ export default function FlightList({ flights }) {
   // List renders correctly, safe to disable lint error
   // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
-    count: 100, // TEMP
+    count: (flights || []).length > 0 ? flights.length : 0,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 60,
     overscan: 5,
@@ -36,8 +37,8 @@ export default function FlightList({ flights }) {
           const lat = parseFloat(flight.latitude);
           const lng = parseFloat(flight.longitude);
           const heading = flight.heading !== null && flight.heading !== undefined ? Math.round(flight.heading || 0) : 0;
-          const altitude = flight.altitude !== null && flight.altitude !== undefined ? Math.round(flight.altitude || 0) : 0;
-          const velocity = flight.velocity !== null && flight.velocity !== undefined ? Math.round(flight.velocity || 0) : 0;
+          const altitude = metersToFeet(flight.altitude || 0);
+          const velocity = metersPerSecToMph(flight.velocity || 0);
 
           // find better way to handle when actual count is above estimate
           // currently this causes extra space at the bottom of list when using
@@ -73,7 +74,7 @@ export default function FlightList({ flights }) {
                   paddingLeft: "5px",
                 }}
               >
-                Alt: {altitude}m | Vel: {velocity} km/h | Long: {isNaN(lng) ? 'N/A' : lng}{" "}
+                Alt: {altitude} ft | Ground Speed: {velocity} mph | Long: {isNaN(lng) ? 'N/A' : lng}{" "}
                 Lat: {isNaN(lat) ? 'N/A' : lat} | Heading: {heading}°
               </div>
             </div>
