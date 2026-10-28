@@ -14,7 +14,6 @@ export const metersToFeet = (meters) => {
 // Convert from meters/s to miles/hr
 export const metersPerSecToMph = (meters) => {
   if (meters !== null && meters !== undefined) {
-    console.log(meters)
     const milesRaw = meters * 2.23694;
     return Math.round(milesRaw || 0);
   }
