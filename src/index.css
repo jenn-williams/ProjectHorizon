@@ -97,6 +97,18 @@ body {
   border-top-color: #1e293b;
 }
 
+.flight-route-link {
+  color: #94a3b8;
+  outline: none;
+  text-decoration: none;
+}
+
+.flight-route-link:hover {
+  color: #fff;
+  outline: none;
+  text-decoration: none;
+}
+
 /*** Plane loading animation)
  /* 1. THE PARENT UNIVERSE */
 .flight-universe {

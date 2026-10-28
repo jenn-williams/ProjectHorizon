@@ -127,9 +127,9 @@ function App() {
               width: "100%",
             }}
           >
-            <div class="flight-universe">
-              <div class="flight-zone">
-                <svg class="flight-svg" viewBox="0 0 450 350">
+            <div className="flight-universe">
+              <div className="flight-zone">
+                <svg className="flight-svg" viewBox="0 0 450 350">
                   <defs>
                     <linearGradient
                       id="perfectRouteGradient"
@@ -141,24 +141,19 @@ function App() {
                     >
                       <stop
                         offset="0%"
-                        stop-color="#334155"
-                        stop-opacity="0.1"
+                        stopColor="#334155"
+                        stopOpacity="0.1"
                       />
-                      <stop offset="100%" stop-color="#ffffff" />
+                      <stop offset="100%" stopColor="#ffffff" />
                     </linearGradient>
                   </defs>
                   <path
-                    class="flight-path"
+                    className="flight-path"
                     d="M 150,165 a 130,65 0 1,0 0.1,0 Z"
                   />
-
-                  <g class="airplane">
-                    {/* <path
-                      d="M-20,0 L-5,-3 L5,-25 L10,-25 L5,-3 L20,-2 L25,-10 L28,-10 L25,0 L28,10 L25,10 L20,2 L5,3 L10,25 L5,25 L-5,3 L-20,0 Z"
-                      transform="scale(1.1)"
-                    /> */}
+                  <g className="airplane">
                     <image
-                      href="./public/plane.svg"
+                      href="./plane.svg"
                       width="150"
                       height="150"
                       x="-75"
