@@ -1,15 +1,85 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import FlightList from "./components/FlightList";
 import FlightMap from "./components/FlightMap";
 
 import "./App.css";
 
+// Search bar with internal ref to guarantee focus retention of cursor
+const SearchBar = memo(({ value, onChange, onClear }) => {
+  const inputRef = useRef(null);
+
+  // Maintain focus lock on update
+  useEffect(() => {
+    if (document.activeElement === inputRef.current) {
+      const frame = requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [value]);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: "20px",
+      }}
+    >
+      <input
+        ref={inputRef}
+        key="stable-flight-search-input"
+        type="text"
+        placeholder="Search Callsign (ex: SWA123)..."
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value.toUpperCase().replace(/\s/g, ""))
+        }
+        style={{
+          backgroundColor: "#334155",
+          border: "1px solid #475569",
+          borderRadius: "6px",
+          color: "#f8fafc",
+          fontSize: "0.9rem",
+          padding: "8px 12px",
+          width: "240px",
+          outline: "none",
+        }}
+      />
+      {value && (
+        <button
+          onClick={onClear}
+          style={{
+            position: "absolute",
+            right: "10px",
+            background: "none",
+            border: "none",
+            color: "#94a3b8",
+            cursor: "pointer",
+            fontSize: "0.85rem",
+          }}
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  );
+});
+
+SearchBar.displayName = "SearchBar";
+
 function App() {
   const [flights, setFlights] = useState([]);
   const flightsCacheRef = useRef({}); // Keep cache of current flight data
+  const [searchQuery, setSearchQuery] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const workerRef = useRef(null);
   const wsRef = useRef(null);
+
+  const filteredFlights = searchQuery
+    ? flights.filter((f) => f.callsign?.toUpperCase().includes(searchQuery))
+    : flights;
 
   useEffect(() => {
     // Initialize worker for data processing
@@ -77,6 +147,8 @@ function App() {
     };
   }, []);
 
+  const flightCount = searchQuery ? `${filteredFlights.length} of ${flights.length}` : `${flights.length}`;
+
   return (
     <>
       <div
@@ -95,7 +167,6 @@ function App() {
         <header
           style={{
             alignItems: "center",
-            // backgroundColor: "#000",
             boxShadow: "0 2px 4px rgba(0,0,0,2)",
             boxSizing: "border-box",
             color: "#f8fafc",
@@ -107,9 +178,15 @@ function App() {
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <h1 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>
-              SkyTracker Ingestion Engine ({flights.length} Flights)
+              {`SkyTracker Ingestion Engine (${flightCount} Total Flights)`}
             </h1>
             <span
               style={{
@@ -117,25 +194,29 @@ function App() {
                 borderRadius: "50%",
                 display: "inline-block",
                 height: "10px",
+                marginLeft: "10px",
                 width: "10px",
               }}
               title={isConnected ? "WebSocket Connected" : "Disconnected"}
             />
           </div>
-          <nav style={{ display: "flex", gap: "20px" }}>
-            <a
-              href="#"
-              style={{
-                color: "#94a3b8", // To do: add white on hover
-                textDecoration: "none",
-                fontWeight: "500",
-              }}
-            >
-              About
-            </a>
-          </nav>
+          <div style={{ display: "flex" }}>
+            <nav style={{ display: "flex", alignItems: "center" }}>
+              <a
+                className="about-pg-link"
+                href="#"
+              >
+                About
+              </a>
+            </nav>
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onClear={() => setSearchQuery("")}
+            />
+          </div>
         </header>
-        {flights && isConnected && flights.length > 0 ? (
+        {isConnected && flights.length > 0 ? (
           <div
             style={{
               display: "flex",
@@ -153,7 +234,7 @@ function App() {
                 width: "30%",
               }}
             >
-              <FlightList flights={flights} />
+              <FlightList flights={filteredFlights} />
             </div>
             <div
               style={{
@@ -163,7 +244,10 @@ function App() {
                 width: "70%",
               }}
             >
-              <FlightMap flights={flights} flightsCache={flightsCacheRef} />
+              <FlightMap
+                flights={filteredFlights}
+                flightsCache={flightsCacheRef}
+              />
             </div>
           </div>
         ) : (
@@ -171,6 +255,7 @@ function App() {
             style={{
               alignItems: "center",
               display: "flex",
+              flex: 1,
               justifyContent: "center",
               width: "100%",
             }}

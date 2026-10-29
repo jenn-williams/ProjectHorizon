@@ -14,6 +14,24 @@ export default function FlightList({ flights }) {
     overscan: 5,
   });
 
+  if (flights.length === 0) {
+    return (
+      <div
+        ref={parentRef}
+        className="FlightListContainer"
+        style={{
+          display: "flex",
+          height: "100%",
+          justifyContent: "center",
+          overflow: "auto",
+          width: "100%",
+        }}
+      >
+        <p>No flights found</p>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={parentRef}
@@ -33,16 +51,12 @@ export default function FlightList({ flights }) {
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const flight = flights[virtualRow.index] || null;
-
           const lat = parseFloat(flight.latitude);
           const lng = parseFloat(flight.longitude);
           const heading = flight.heading !== null && flight.heading !== undefined ? Math.round(flight.heading || 0) : 0;
           const altitude = metersToFeet(flight.altitude || 0);
           const velocity = metersPerSecToMph(flight.velocity || 0);
 
-          // find better way to handle when actual count is above estimate
-          // currently this causes extra space at the bottom of list when using
-          // the live data
           return flight && (
             <div
               key={virtualRow.index}
@@ -65,7 +79,7 @@ export default function FlightList({ flights }) {
                   paddingLeft: "5px",
                 }}
               >
-                ✈️ Flight: {flight.callsign} - {flight.country}
+                ✈️ Flight: {flight.callsign}
               </div>
               <div
                 style={{
