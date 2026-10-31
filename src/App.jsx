@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import FlightList from "./components/FlightList";
 import FlightMap from "./components/FlightMap";
+import PerformanceMonitor from "./components/PerformanceMonitor";
 
 import "./App.css";
 
@@ -185,20 +186,10 @@ function App() {
               justifyContent: "space-between",
             }}
           >
-            <h1 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}>
+            <h1 style={{ margin: "0 10px 0 0", fontSize: "1.25rem", fontWeight: "600" }}>
               {`SkyTracker Ingestion Engine (${flightCount} Total Flights)`}
             </h1>
-            <span
-              style={{
-                backgroundColor: isConnected ? "#10b981" : "#ef4444",
-                borderRadius: "50%",
-                display: "inline-block",
-                height: "10px",
-                marginLeft: "10px",
-                width: "10px",
-              }}
-              title={isConnected ? "WebSocket Connected" : "Disconnected"}
-            />
+            <PerformanceMonitor />
           </div>
           <div style={{ display: "flex" }}>
             <nav style={{ display: "flex", alignItems: "center" }}>
