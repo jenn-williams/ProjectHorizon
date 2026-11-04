@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { metersPerSecToMph, metersToFeet } from "../utils";
 
-const imagePath = `${import.meta.env.BASE_URL}dark_plane.svg`;
+const imagePath = `${import.meta.env.BASE_URL}plane_outline.png`;
 
 // Function to update flight location and heading
 function updateFlightTelemetry(flightMarker, newLngLat, newHeading) {
@@ -168,8 +168,8 @@ export default function LiveMap({ flights, flightsCache }) {
         outerEl.setAttribute("data-flight-id", icao24);
         const innerEl = document.createElement("div");
         innerEl.className = "flight-marker";
-        innerEl.style.width = "40px";
-        innerEl.style.height = "40px";
+        innerEl.style.width = "25px";
+        innerEl.style.height = "25px";
         innerEl.style.backgroundImage = `url("${imagePath}")`;
         innerEl.style.backgroundSize = "contain";
         innerEl.style.cursor = "pointer";
