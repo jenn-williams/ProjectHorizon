@@ -140,6 +140,9 @@ function App() {
     // Clean up on unmount
     return () => {
       if (wsRef.current) {
+        // Remove the onclose listener before closing
+        // This prevents the old socket from triggering a reconnection loop
+        wsRef.current.onclose = null; 
         wsRef.current.close();
       }
       if (workerRef.current) {
@@ -150,6 +153,7 @@ function App() {
 
   const flightCount = searchQuery ? `${filteredFlights.length} of ${flights.length}` : `${flights.length}`;
 
+  console.log(isConnected, flights?.length)
   return (
     <>
       <div
