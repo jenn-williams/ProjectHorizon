@@ -9,7 +9,7 @@ export default function PerfMonitor() {
     let animationFrameId;
 
     // Set the initial non-idempotent time safely outside of the render thread
-    lastTimeRef.current = performance.now(); 
+    lastTimeRef.current = performance.now();
 
     const loop = () => {
       frameCountRef.current += 1;
@@ -39,22 +39,7 @@ export default function PerfMonitor() {
   };
 
   return (
-    <div
-      style={{
-        alignItems: "center",
-        backgroundColor: "#1e293b",
-        border: "1px solid #334155",
-        borderRadius: "6px",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.5)",
-        color: "#94a3b8",
-        display: "flex",
-        fontFamily: "monospace",
-        fontSize: "0.75rem",
-        gap: "8px",
-        padding: "6px 10px",
-        userSelect: "none",
-      }}
-    >
+    <div className="performance-monitor">
       <span style={{ color: getStatusColor(fps), fontWeight: "bold" }}>
         {fps} FPS
       </span>

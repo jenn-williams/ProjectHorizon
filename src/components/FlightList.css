@@ -1,0 +1,22 @@
+.flight-list-container {
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+}
+
+.flight-list-container.empty {
+    display: flex;
+    justify-content: center;
+}
+
+.flight-title {
+    color: #fff;
+    font-weight: bold;
+    padding: 5px 0 0 5px;
+}
+
+.flight-info {
+    color: #6b7280;
+    font-size: 0.6rem;
+    padding-left: 5px;
+}

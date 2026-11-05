@@ -20,14 +20,7 @@ const SearchBar = memo(({ value, onChange, onClear }) => {
   }, [value]);
 
   return (
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: "20px",
-      }}
-    >
+    <div className="search-bar-wrapper">
       <input
         ref={inputRef}
         key="stable-flight-search-input"
@@ -37,30 +30,10 @@ const SearchBar = memo(({ value, onChange, onClear }) => {
         onChange={(e) =>
           onChange(e.target.value.toUpperCase().replace(/\s/g, ""))
         }
-        style={{
-          backgroundColor: "#334155",
-          border: "1px solid #475569",
-          borderRadius: "6px",
-          color: "#f8fafc",
-          fontSize: "0.9rem",
-          padding: "8px 12px",
-          width: "240px",
-          outline: "none",
-        }}
+        className="search-bar"
       />
       {value && (
-        <button
-          onClick={onClear}
-          style={{
-            position: "absolute",
-            right: "10px",
-            background: "none",
-            border: "none",
-            color: "#94a3b8",
-            cursor: "pointer",
-            fontSize: "0.85rem",
-          }}
-        >
+        <button className="search-clear-button" onClick={onClear}>
           ✕
         </button>
       )}
@@ -142,7 +115,7 @@ function App() {
       if (wsRef.current) {
         // Remove the onclose listener before closing
         // This prevents the old socket from triggering a reconnection loop
-        wsRef.current.onclose = null; 
+        wsRef.current.onclose = null;
         wsRef.current.close();
       }
       if (workerRef.current) {
@@ -151,56 +124,23 @@ function App() {
     };
   }, []);
 
-  const flightCount = searchQuery ? `${filteredFlights.length} of ${flights.length}` : `${flights.length}`;
+  const flightCount = searchQuery
+    ? `${filteredFlights.length} of ${flights.length}`
+    : `${flights.length}`;
 
-  console.log(isConnected, flights?.length)
   return (
     <>
-      <div
-        style={{
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: "sans-serif",
-          height: "100vh",
-          maxHeight: "100vh",
-          overflow: "hidden",
-          position: "relative",
-          width: "100vw",
-        }}
-      >
-        <header
-          style={{
-            alignItems: "center",
-            boxShadow: "0 2px 4px rgba(0,0,0,2)",
-            boxSizing: "border-box",
-            color: "#f8fafc",
-            display: "flex",
-            height: "60px",
-            justifyContent: "space-between",
-            padding: "0 20px",
-            width: "100%",
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <h1 style={{ margin: "0 10px 0 0", fontSize: "1.25rem", fontWeight: "600" }}>
+      <div className="app-wrapper">
+        <header className="app-bar">
+          <div className="header-left">
+            <h1 className="header-title">
               {`SkyTracker Ingestion Engine (${flightCount} Total Flights)`}
             </h1>
             <PerformanceMonitor />
           </div>
-          <div style={{ display: "flex" }}>
-            <nav style={{ display: "flex", alignItems: "center" }}>
-              <a
-                className="about-pg-link"
-                href="#"
-              >
+          <div className="header-right">
+            <nav className="nav-wrapper">
+              <a className="about-pg-link" href="#">
                 About
               </a>
             </nav>
@@ -212,33 +152,11 @@ function App() {
           </div>
         </header>
         {isConnected && flights.length > 0 ? (
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              height: "calc(100vh - 60px)",
-              position: "relative",
-              width: "100%",
-            }}
-          >
-            <div
-              style={{
-                borderRight: "1px solid #ccc",
-                boxSizing: "border-box",
-                height: "100%",
-                width: "30%",
-              }}
-            >
+          <div className="content-wrapper">
+            <div className="content-left">
               <FlightList flights={filteredFlights} />
             </div>
-            <div
-              style={{
-                boxSizing: "border-box",
-                height: "100%",
-                position: "relative",
-                width: "70%",
-              }}
-            >
+            <div className="content-right">
               <FlightMap
                 flights={filteredFlights}
                 flightsCache={flightsCacheRef}
@@ -246,15 +164,7 @@ function App() {
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              alignItems: "center",
-              display: "flex",
-              flex: 1,
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
+          <div className="loading-screen">
             <div className="flight-universe">
               <div className="flight-zone">
                 <svg className="flight-svg" viewBox="0 0 450 350">

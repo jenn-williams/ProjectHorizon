@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { metersPerSecToMph, metersToFeet } from "../utils";
 
+import "./FlightList.css";
+
 export default function FlightList({ flights }) {
   const parentRef = useRef(null);
 
@@ -16,32 +18,14 @@ export default function FlightList({ flights }) {
 
   if (flights.length === 0) {
     return (
-      <div
-        ref={parentRef}
-        className="FlightListContainer"
-        style={{
-          display: "flex",
-          height: "100%",
-          justifyContent: "center",
-          overflow: "auto",
-          width: "100%",
-        }}
-      >
+      <div ref={parentRef} className="flight-list-container empty">
         <p>No flights found</p>
       </div>
     );
   }
 
   return (
-    <div
-      ref={parentRef}
-      className="FlightListContainer"
-      style={{
-        height: "100%",
-        overflow: "auto",
-        width: "100%",
-      }}
-    >
+    <div ref={parentRef} className="flight-list-container">
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
@@ -53,45 +37,36 @@ export default function FlightList({ flights }) {
           const flight = flights[virtualRow.index] || null;
           const lat = parseFloat(flight.latitude);
           const lng = parseFloat(flight.longitude);
-          const heading = flight.heading !== null && flight.heading !== undefined ? Math.round(flight.heading || 0) : 0;
+          const heading =
+            flight.heading !== null && flight.heading !== undefined
+              ? Math.round(flight.heading || 0)
+              : 0;
           const altitude = metersToFeet(flight.altitude || 0);
           const velocity = metersPerSecToMph(flight.velocity || 0);
 
-          return flight && (
-            <div
-              key={virtualRow.index}
-              className=""
-              style={{
-                border: "1px solid #eee",
-                height: `${virtualRow.size}px`,
-                left: 0,
-                position: "absolute",
-                top: 0,
-                transform: `translateY(${virtualRow.start}px)`,
-                width: "100%",
-              }}
-            >
+          return (
+            flight && (
               <div
+                key={virtualRow.index}
+                className=""
                 style={{
-                  color: "#fff",
-                  fontWeight: "bold",
-                  paddingTop: "5px",
-                  paddingLeft: "5px",
+                  border: "1px solid #eee",
+                  height: `${virtualRow.size}px`,
+                  left: 0,
+                  position: "absolute",
+                  top: 0,
+                  transform: `translateY(${virtualRow.start}px)`,
+                  width: "100%",
                 }}
               >
-                ✈️ Flight: {flight.callsign}
+                <div className="flight-title">✈️ Flight: {flight.callsign}</div>
+                <div className="flight-info">
+                  Alt: {altitude} ft | Ground Speed: {velocity} mph | Long:{" "}
+                  {isNaN(lng) ? "N/A" : lng} | Lat: {isNaN(lat) ? "N/A" : lat} |
+                  Heading: {heading}°
+                </div>
               </div>
-              <div
-                style={{
-                  color: "#6b7280",
-                  fontSize: "11px",
-                  paddingLeft: "5px",
-                }}
-              >
-                Alt: {altitude} ft | Ground Speed: {velocity} mph | Long: {isNaN(lng) ? 'N/A' : lng}{" "}
-                Lat: {isNaN(lat) ? 'N/A' : lat} | Heading: {heading}°
-              </div>
-            </div>
+            )
           );
         })}
       </div>
