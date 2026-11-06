@@ -1,6 +1,6 @@
 /* Page & App Bar */
 .app-wrapper {
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
     display: flex;
     flex-direction: column;
     font-family: sans-serif;
@@ -102,7 +102,24 @@ input::placeholder {
     right: 10px;
 }
 
-/* Page Content: list and map */
+/* Dashboard Content: list and map */
+/* Initial masked state: transparent, dropped down, slightly blurred */
+.dashboard-hidden {
+    filter: blur(4px);
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+}
+
+/* Activated state: glides up into crisp focus */
+.dashboard-reveal {
+    filter: blur(0px);
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition:
+        opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1),
+        filter 1000ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 
 .content-wrapper {
     display: flex;
@@ -110,6 +127,7 @@ input::placeholder {
     height: calc(100vh - 60px);
     position: relative;
     width: 100%;
+    will-change: opacity, transform, filter;
 }
 
 .content-left {
@@ -126,62 +144,118 @@ input::placeholder {
     width: 70%;
 }
 
-/* Loading screen and animation */
-.loading-screen {
+/* Loading animation */
+.loader-backdrop {
     align-items: center;
-    display: flex;
-    flex: 1;
-    justify-content: center;
-    width: 100%;
-}
-
-.flight-universe {
     background-color: #11141a;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
+    display: flex;
     height: 100vh;
+    justify-content: center;
+    position: fixed;
+    left: 0;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    pointer-events: all;
+    opacity: 1;
+    top: 0;
+    transition: opacity 1800ms cubic-bezier(0.25, 1, 0.5, 1);
+    width: 100vw;
     z-index: 9999;
 }
 
-.flight-zone {
+.loader-backdrop.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.flight-universe {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Layout Elements*/
+.flight-container {
+    height: 350px;
     position: relative;
     width: 450px;
+}
+
+.flight-zone {
     height: 350px;
     overflow: visible;
+    position: relative;
     transform: rotate(-20deg);
+    width: 450px;
 }
 
 .flight-svg {
-    width: 100%;
     height: 100%;
     overflow: visible;
+    width: 100%;
 }
 
+/* Track Paths */
 .flight-path {
-    stroke: url(#perfectRouteGradient);
-    stroke-width: 4;
-    stroke-linecap: round;
+    animation: drawTrail 1.7s linear infinite;
     fill: none;
+    stroke: url(#perfectRouteGradient);
     stroke-dasharray: 572 640;
     stroke-dashoffset: 572;
-    animation: drawTrail 1.7s linear infinite;
+    stroke-linecap: round;
+    stroke-width: 4;
 }
 
 .airplane {
+    animation: flyPlane 1.7s linear infinite;
     fill: #a7afb9;
     offset-path: path("M 150,165 a 130,65 0 1,0 0.1,0 Z");
     offset-rotate: auto 90deg;
-    animation: flyPlane 1.7s linear infinite;
+    /* 
+      Promotes the airplane's track position to the GPU.
+      This prevents the browser from recalculating layout geometry mid-flight.
+    */
+    transform: translateZ(0);
+    will-change: offset-distance;
 }
 
-/* Animation keyframes */
+/* Breakout Timelines*/
+/* 
+  Ensures that the transition from a running loop to the breakout phase 
+  doesn't drop a frame due to anti-aliasing recalculations.
+*/
+.airplane.breakout {
+    animation: breakoutOrbit 5.5s linear forwards;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.breakout-wrapper {
+    /* 
+      Promotes the translation container to an independent GPU layer.
+      This isolates the screen coordinates from the nested SVG drawing pass.
+    */
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.breakout-wrapper.run-exit {
+    /* 
+      Using an explicitly clean quintic deceleration curve 
+      to eliminate tracking micro-stutters during the launch phase.
+    */
+    animation: breakoutTranslate 5.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Handles tracking line freeze and subsequent smooth fade-out */
+.breakout-wrapper.run-exit~.flight-path,
+.flight-svg:has(.breakout) .flight-path {
+    animation: fadePathAway 5.5s ease-out forwards;
+}
+
+/*  Keyframes*/
 @keyframes drawTrail {
     0% {
         stroke-dashoffset: 572;
@@ -202,5 +276,49 @@ input::placeholder {
     85%,
     100% {
         offset-distance: 89.37%;
+    }
+}
+
+@keyframes breakoutOrbit {
+    0% {
+        offset-distance: 0%;
+    }
+
+    15.45% {
+        offset-distance: 50%;
+    }
+
+    100% {
+        offset-distance: 50%;
+    }
+}
+
+@keyframes breakoutTranslate {
+
+    0%,
+    15.45% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+
+    100% {
+        transform: translate(230vw, -100vh) rotate(-25deg) scale(0.55);
+    }
+}
+
+@keyframes fadePathAway {
+    0% {
+        stroke-dashoffset: 572;
+        opacity: 1;
+    }
+
+    15.45% {
+        stroke-dashoffset: 252;
+        opacity: 1;
+    }
+
+    22%,
+    100% {
+        stroke-dashoffset: 252;
+        opacity: 0;
     }
 }

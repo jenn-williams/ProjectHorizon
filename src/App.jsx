@@ -43,6 +43,88 @@ const SearchBar = memo(({ value, onChange, onClear }) => {
 
 SearchBar.displayName = "SearchBar";
 
+function PlaneLoader({ isReady, onBreakoutStart, onTransitionComplete }) {
+  const [backdropFade, setBackdropFade] = useState(false);
+  const [exitTriggered, setExitTriggered] = useState(false);
+
+  const handleAnimationIteration = () => {
+    // If the app is ready, catch the loop reset and switch to the exit sequence
+    if (isReady && !exitTriggered) {
+      setExitTriggered(true);
+    }
+  };
+
+  useEffect(() => {
+    if (exitTriggered) {
+      // 1. At 850ms, the plane breaks out.
+      // Trigger the dashboard fade-IN and the loader background fade-OUT at the exact same frame!
+      const transitionStartTimer = setTimeout(() => {
+        onBreakoutStart();
+        setBackdropFade(true); // Start dissolving the dark background curtain right now
+      }, 850);
+
+      // 2. Give the plane plenty of time to finish its slow, beautiful 5.5s diagonal glide
+      // before unmounting the element completely from the layout tree.
+      const unmountTimer = setTimeout(() => {
+        onTransitionComplete();
+      }, 5500);
+
+      return () => {
+        clearTimeout(transitionStartTimer);
+        clearTimeout(unmountTimer);
+      };
+    }
+  }, [exitTriggered, onBreakoutStart, onTransitionComplete]);
+
+  return (
+    <div className={`loader-backdrop ${backdropFade ? "fade-out" : ""}`}>
+      <div className="flight-universe">
+        <div className="flight-zone">
+          <div>
+            <div className={`flight-container`}>
+              <svg className="flight-svg" viewBox="0 0 450 350">
+                <defs>
+                  <linearGradient
+                    id="perfectRouteGradient"
+                    gradientUnits="userSpaceOnUse"
+                    x1="170"
+                    y1="230"
+                    x2="210"
+                    y2="230"
+                  >
+                    <stop offset="0%" stopColor="#334155" stopOpacity="0.1" />
+                    <stop offset="100%" stopColor="#ffffff" />
+                  </linearGradient>
+                </defs>
+                <path
+                  className={"flight-path"}
+                  d="M 150,165 a 130,65 0 1,0 0.1,0 Z"
+                />
+                <g
+                  className={`breakout-wrapper ${exitTriggered ? "run-exit" : ""}`}
+                >
+                  <g
+                    className={`airplane ${exitTriggered ? "breakout" : ""}`}
+                    onAnimationIteration={handleAnimationIteration}
+                  >
+                    <image
+                      href="./plane.svg"
+                      width="150"
+                      height="150"
+                      x="-75"
+                      y="-75"
+                    />
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [flights, setFlights] = useState([]);
   const flightsCacheRef = useRef({}); // Keep cache of current flight data
@@ -50,6 +132,9 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const workerRef = useRef(null);
   const wsRef = useRef(null);
+
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [isTakingOff, setIsTakingOff] = useState(false);
 
   const filteredFlights = searchQuery
     ? flights.filter((f) => f.callsign?.toUpperCase().includes(searchQuery))
@@ -128,6 +213,8 @@ function App() {
     ? `${filteredFlights.length} of ${flights.length}`
     : `${flights.length}`;
 
+  const isDataLoaded = isConnected && flights.length > 0;
+
   return (
     <>
       <div className="app-wrapper">
@@ -151,53 +238,26 @@ function App() {
             />
           </div>
         </header>
-        {isConnected && flights.length > 0 ? (
-          <div className="content-wrapper">
-            <div className="content-left">
-              <FlightList flights={filteredFlights} />
-            </div>
-            <div className="content-right">
-              <FlightMap
-                flights={filteredFlights}
-                flightsCache={flightsCacheRef}
-              />
-            </div>
+
+        <div
+          className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"}`}
+        >
+          <div className="content-left">
+            <FlightList flights={filteredFlights} />
           </div>
-        ) : (
-          <div className="loading-screen">
-            <div className="flight-universe">
-              <div className="flight-zone">
-                <svg className="flight-svg" viewBox="0 0 450 350">
-                  <defs>
-                    <linearGradient
-                      id="perfectRouteGradient"
-                      gradientUnits="userSpaceOnUse"
-                      x1="170"
-                      y1="230"
-                      x2="210"
-                      y2="230"
-                    >
-                      <stop offset="0%" stopColor="#334155" stopOpacity="0.1" />
-                      <stop offset="100%" stopColor="#ffffff" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    className="flight-path"
-                    d="M 150,165 a 130,65 0 1,0 0.1,0 Z"
-                  />
-                  <g className="airplane">
-                    <image
-                      href="./plane.svg"
-                      width="150"
-                      height="150"
-                      x="-75"
-                      y="-75"
-                    />
-                  </g>
-                </svg>
-              </div>
-            </div>
+          <div className="content-right">
+            <FlightMap
+              flights={filteredFlights}
+              flightsCache={flightsCacheRef}
+            />
           </div>
+        </div>
+        {!isAnimationComplete && (
+          <PlaneLoader
+            isReady={isDataLoaded}
+            onBreakoutStart={() => setIsTakingOff(true)}
+            onTransitionComplete={() => setIsAnimationComplete(true)}
+          />
         )}
       </div>
     </>
