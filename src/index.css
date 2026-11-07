@@ -58,7 +58,7 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   font-family: "Montserrat", Arial, sans-serif;
   padding: 10px;
-  min-width: 150px;
+  min-width: 170px;
 }
 
 .flight-tooltip>.maplibregl-popup-tip {
