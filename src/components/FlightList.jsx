@@ -48,10 +48,11 @@ export default function FlightList({ flights }) {
             flight && (
               <div
                 key={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
                 className=""
                 style={{
                   border: "1px solid #eee",
-                  height: `${virtualRow.size}px`,
                   left: 0,
                   position: "absolute",
                   top: 0,
@@ -59,7 +60,10 @@ export default function FlightList({ flights }) {
                   width: "100%",
                 }}
               >
-                <div className="flight-title">✈️ Flight: {flight.callsign}</div>
+                <div className="flight-title">
+                  <img className="plane-icon" src="./light_plane.png" alt="Plane" />
+                  Flight: {flight.callsign}
+                </div>
                 <div className="flight-info">
                   Alt: {altitude} ft | Ground Speed: {velocity} mph | Long:{" "}
                   {isNaN(lng) ? "N/A" : lng} | Lat: {isNaN(lat) ? "N/A" : lat} |

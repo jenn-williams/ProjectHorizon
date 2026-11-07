@@ -10,6 +10,8 @@
 }
 
 .flight-title {
+    display: flex;
+    align-items: center;
     color: #fff;
     font-weight: bold;
     padding: 5px 0 0 5px;
@@ -18,5 +20,12 @@
 .flight-info {
     color: #6b7280;
     font-size: 0.6rem;
-    padding-left: 5px;
+    padding-left: 10px;
+}
+
+.plane-icon {
+    height: 20px;
+    padding: 5px;
+    rotate: 45deg;
+    width: 20px;
 }

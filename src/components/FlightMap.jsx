@@ -22,10 +22,13 @@ const createTooltipContent = (flight, heading) => {
 
   // Tooltip content
   return `
-        <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 160px; color: #fff; background: #1e293b; border-radius: 4px;">
+        <div style="font-family: "Montserrat", sans-serif; padding: 0 4px 4px 4px; color: #fff; background: #1e293b; border-radius: 4px;">
           <div style="font-weight: bold; font-size: 14px; border-bottom: 1px solid #475569; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
-            <span>✈️ ${flight.callsign || "UNKNOWN"}</span>
-            <span style="color: #38bdf8; font-size: 11px;">${flight.icao24.toUpperCase()}</span>
+            <div style="align-items: center; display: flex">
+              <img style="height: 20px; rotate: 45deg; padding: 5px; width: 20px;" src="./light_plane.png" alt="Plane" />
+              ${flight.callsign || "UNKNOWN"}
+            </div>
+            <span style="align-items: center; color: #38bdf8; display: flex; font-size: 11px; text-align: center;">${flight.icao24.toUpperCase()}</span>
           </div>
           <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
             <div>Ground Speed: <span style="color: #e2e8f0;">${velocity} mph</span></div>

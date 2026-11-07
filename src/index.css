@@ -50,15 +50,15 @@ body {
   margin: 0;
 }
 
-
-/* Overwrites MapLibre's default white popup bubble wrapper containers */
+/* Overwrites MapLibre's default styles */
 .flight-tooltip>.maplibregl-popup-content {
   background: #1e293b;
-  /* Deep dark slate dashboard color */
   border: none;
   border-radius: 6px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: "Montserrat", Arial, sans-serif;
   padding: 10px;
+  min-width: 150px;
 }
 
 .flight-tooltip>.maplibregl-popup-tip {
@@ -98,6 +98,7 @@ body {
   border-top-color: #1e293b;
 }
 
+/* additional tooltip styles */
 .flight-route-link {
   color: #94a3b8;
   outline: none;

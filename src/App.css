@@ -3,7 +3,7 @@
     /* box-sizing: border-box; */
     display: flex;
     flex-direction: column;
-    font-family: sans-serif;
+    font-family: "Montserrat", Arial, sans-serif;
     height: 100vh;
     max-height: 100vh;
     overflow: hidden;
@@ -89,6 +89,7 @@
 
 input::placeholder {
     color: #94a3b8;
+    font-family: "Montserrat", Arial, sans-serif;
     opacity: 1;
 }
 
@@ -264,7 +265,7 @@ input::placeholder {
     border-right: 1px solid #ccc;
     box-sizing: border-box;
     height: 100%;
-    width: 30%;
+    min-width: 30%;
 }
 
 .content-right {
