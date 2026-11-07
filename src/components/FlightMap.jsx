@@ -26,7 +26,7 @@ const createTooltipContent = (flight, heading) => {
           <div style="font-weight: bold; font-size: 14px; border-bottom: 1px solid #475569; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
             <div style="align-items: center; display: flex">
               <img style="height: 20px; rotate: 45deg; padding: 5px; width: 20px;" src="./light_plane.png" alt="Plane" />
-              ${flight.callsign || "UNKNOWN"}
+              <span style="color: #fff;">${flight.callsign || "UNKNOWN"}</span>
             </div>
             <span style="align-items: center; color: #38bdf8; display: flex; font-size: 11px; text-align: center;">${flight.icao24.toUpperCase()}</span>
           </div>

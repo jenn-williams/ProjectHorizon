@@ -5,9 +5,10 @@ import PerformanceMonitor from "./components/PerformanceMonitor";
 import PlaneLoader from "./components/PlaneLoader";
 
 import "./App.css";
+import AboutPage from "./AboutPage";
 
 // Search bar with internal ref to guarantee focus retention of cursor
-const SearchBar = memo(({ value, onChange, onClear }) => {
+const SearchBar = memo(({ disabled, onChange, onClear, value }) => {
   const inputRef = useRef(null);
 
   // Maintain focus lock on update
@@ -32,6 +33,7 @@ const SearchBar = memo(({ value, onChange, onClear }) => {
           onChange(e.target.value.toUpperCase().replace(/\s/g, ""))
         }
         className="search-bar"
+        disabled={disabled}
       />
       {value && (
         <button className="search-clear-button" onClick={onClear}>
@@ -44,29 +46,60 @@ const SearchBar = memo(({ value, onChange, onClear }) => {
 
 SearchBar.displayName = "SearchBar";
 
-
 const ERROR_SEVERITY_MAP = {
   // Minor/Transient Errors -> Trigger Toast Notice
 
   // Hit daily credit limit
-  "RATE_LIMITED": { severity: "TRANSIENT", title: "Rate Limit Exceeded", isBlocking: false },
+  RATE_LIMITED: {
+    severity: "TRANSIENT",
+    title: "Rate Limit Exceeded",
+    isBlocking: false,
+  },
   // Error with API request params
-  "INVALID_CONSTRAINTS": { severity: "TRANSIENT", title: "API Validation Error", isBlocking: false },
+  INVALID_CONSTRAINTS: {
+    severity: "TRANSIENT",
+    title: "API Validation Error",
+    isBlocking: false,
+  },
   // Data cannot be read (pipeline cannot be processed due to payload alteration or parsing error)
-  "UNKNOWN_DEGRADATION": { severity: "TRANSIENT", title: "Pipeline/Decoder Anomaly", isBlocking: false },
-  
+  UNKNOWN_DEGRADATION: {
+    severity: "TRANSIENT",
+    title: "Pipeline/Decoder Anomaly",
+    isBlocking: false,
+  },
+
   // Severe/Blocking Errors -> Trigger Glassmorphic Blur Modal
 
   // Expired token/invalid credentials
-  "AUTH_DENIED": { severity: "BLOCKING", title: "Access Key Revoked", isBlocking: true },
+  AUTH_DENIED: {
+    severity: "BLOCKING",
+    title: "Access Key Revoked",
+    isBlocking: true,
+  },
   // Error from OpenSky
-  "DOWNSTREAM_CRASH": { severity: "BLOCKING", title: "OpenSky Network Error", isBlocking: true },
+  DOWNSTREAM_CRASH: {
+    severity: "BLOCKING",
+    title: "OpenSky Network Error",
+    isBlocking: true,
+  },
   // No connection to API
-  "NETWORK_FAULT": { severity: "BLOCKING", title: "Network Interrupted", isBlocking: true },
+  NETWORK_FAULT: {
+    severity: "BLOCKING",
+    title: "Network Interrupted",
+    isBlocking: true,
+  },
   // WebSocket closes unexpectedly (network connection/reboot)
-  "CONNECTION_LOST": { severity: "BLOCKING", title: "WebSocket Disconnected", isBlocking: true },
+  CONNECTION_LOST: {
+    severity: "BLOCKING",
+    title: "WebSocket Disconnected",
+    isBlocking: true,
+  },
   // Unexpected server code error
-  "INTERNAL_SYSTEM_FAULT": { severity: "BLOCKING", title: "Internal Server Error", isBlocking: true },
+  INTERNAL_SYSTEM_FAULT: {
+    severity: "BLOCKING",
+    title: "Internal Server Error",
+    isBlocking: true,
+  },
 };
 
 function App() {
@@ -81,6 +114,8 @@ function App() {
   const [isTakingOff, setIsTakingOff] = useState(false);
 
   const [activeError, setActiveError] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState("");
 
   const filteredFlights = searchQuery
     ? flights.filter((f) => f.callsign?.toUpperCase().includes(searchQuery))
@@ -102,9 +137,9 @@ function App() {
       if (event.data.type === "WORKER_ERROR") {
         const error_config = ERROR_SEVERITY_MAP.UNKNOWN_DEGRADATION;
         setActiveError({
-            ...error_config,
-            message: event.data.message,
-          });
+          ...error_config,
+          message: event.data.message,
+        });
       }
     };
 
@@ -125,7 +160,7 @@ function App() {
         try {
           const payload = JSON.parse(event.data);
           if (payload.type === "FLIGHT_DATA" && workerRef.current) {
-            setActiveError(null); 
+            setActiveError(null);
             // Offload data parsing to worker thread
             workerRef.current.postMessage({
               type: "PROCESS_TELEMETRY",
@@ -137,7 +172,7 @@ function App() {
             const errorConfig = ERROR_SEVERITY_MAP[payload.error] || {
               severity: "TRANSIENT",
               title: "System Exception",
-              isBlocking: false
+              isBlocking: false,
             };
             setActiveError({
               ...errorConfig,
@@ -158,7 +193,8 @@ function App() {
         const closedConfig = ERROR_SEVERITY_MAP["CONNECTION_LOST"];
         setActiveError({
           ...closedConfig,
-          message: "Data stream disconnected. Re-establishing link in 5 seconds...",
+          message:
+            "Data stream disconnected. Re-establishing link in 5 seconds...",
         });
         setIsConnected(false);
         // Retry connection after 5 seconds to allow server to reboot
@@ -189,30 +225,63 @@ function App() {
     };
   }, []);
 
+  // Navigation
+  useEffect(() => {
+  // Function to sync component state with the URL hash location
+  const handleHashChange = () => {
+    const hash = window.location.hash;
+    if (hash === "#about") {
+      setCurrentPage("about");
+    } else {
+      setCurrentPage(""); // Fallback to your main dashboard tracking view
+    }
+  };
+
+  // Run on initial mount to catch a direct link (e.g. ://yoursite.com)
+  handleHashChange();
+
+  // Listen for browser Back/Forward navigation shifts
+  window.addEventListener("hashchange", handleHashChange);
+  
+  return () => {
+    window.removeEventListener("hashchange", handleHashChange);
+  };
+}, []);
+
   const flightCount = searchQuery
     ? `${filteredFlights.length} of ${flights.length}`
     : `${flights.length}`;
 
   // only show plane animation on inital load, if WebSocket disconnects later handle error gracefully with blur modal
-  const isDataLoaded = (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
+  const isDataLoaded =
+    (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
 
+  const isHomePage = currentPage === "";
+  console.log(currentPage)
   return (
     <>
       <div className="app-wrapper">
         <header className="app-bar">
           <div className="header-left">
             <h1 className="header-title">
-              {`SkyTracker Ingestion Engine (${flightCount} Total Flights)`}
+              <a
+                className="pg-link"
+                href="#"
+              >
+                SkyTracker Ingestion Engine
+              </a>
+              {` (${flightCount} Total Flights)`}
             </h1>
             <PerformanceMonitor />
           </div>
           <div className="header-right">
             <nav className="nav-wrapper">
-              <a className="about-pg-link" href="#">
+              <a className="pg-link" href="#about">
                 About
               </a>
             </nav>
             <SearchBar
+              disabled={activeError && activeError?.isBlocking}
               value={searchQuery}
               onChange={setSearchQuery}
               onClear={() => setSearchQuery("")}
@@ -230,37 +299,42 @@ function App() {
               className="error-toast-dismiss"
               onClick={() => setActiveError(null)}
             >
-              ×
+              x
             </button>
           </div>
         )}
-        <div
-          className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${activeError?.isBlocking ? "stale-state" : ""}`}
-        >
-          <div className="content-left">
-            <FlightList flights={filteredFlights} />
-          </div>
-          <div className="content-right">
-            <FlightMap
-              flights={filteredFlights}
-              flightsCache={flightsCacheRef}
-            />
-          </div>
-          {activeError?.isBlocking && (
-          <div className="glass-recovery-modal">
-            <div className="pulse-beacon" />
-            <h3 className="modal-title">{activeError.title}</h3>
-            <p className="modal-message">{activeError.message}</p>
-          </div>
+        {isHomePage && (
+          <>
+            <div
+              className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${activeError?.isBlocking ? "stale-state" : ""}`}
+            >
+              <div className="content-left">
+                <FlightList flights={filteredFlights} />
+              </div>
+              <div className="content-right">
+                <FlightMap
+                  flights={filteredFlights}
+                  flightsCache={flightsCacheRef}
+                />
+              </div>
+              {activeError?.isBlocking && (
+                <div className="glass-recovery-modal">
+                  <div className="pulse-beacon" />
+                  <h3 className="modal-title">{activeError.title}</h3>
+                  <p className="modal-message">{activeError.message}</p>
+                </div>
+              )}
+            </div>
+            {!isAnimationComplete && isHomePage && (
+              <PlaneLoader
+                isReady={isDataLoaded}
+                onBreakoutStart={() => setIsTakingOff(true)}
+                onTransitionComplete={() => setIsAnimationComplete(true)}
+              />
+            )}
+          </>
         )}
-        </div>
-        {!isAnimationComplete && (
-          <PlaneLoader
-            isReady={isDataLoaded}
-            onBreakoutStart={() => setIsTakingOff(true)}
-            onTransitionComplete={() => setIsAnimationComplete(true)}
-          />
-        )}
+        {currentPage === "about" && <AboutPage />}
       </div>
     </>
   );

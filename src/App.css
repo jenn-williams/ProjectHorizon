@@ -19,7 +19,7 @@
     display: flex;
     height: 60px;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 6px;
     width: 100%;
     z-index: 1000;
 }
@@ -59,20 +59,25 @@
     display: flex;
 }
 
-.about-pg-link {
-    color: #94a3b8;
+.pg-link,
+.link {
+    color: #fff;
+    padding: 4px 6px;
     text-decoration: none;
     font-weight: "500";
 }
 
-.about-pg-link:hover {
-    color: #fff;
+.pg-link:hover,
+.link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
 }
 
 .search-bar-wrapper {
     align-items: center;
     display: flex;
     padding-left: 20px;
+    padding-right: 6px;
     position: relative;
 }
 
