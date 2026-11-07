@@ -125,6 +125,30 @@ function PlaneLoader({ isReady, onBreakoutStart, onTransitionComplete }) {
   );
 }
 
+const ERROR_SEVERITY_MAP = {
+  // Minor/Transient Errors -> Trigger Toast Notice
+
+  // Hit daily credit limit
+  "RATE_LIMITED": { severity: "TRANSIENT", title: "Rate Limit Exceeded", isBlocking: false },
+  // Error with API request params
+  "INVALID_CONSTRAINTS": { severity: "TRANSIENT", title: "API Validation Error", isBlocking: false },
+  // Data cannot be read (pipeline cannot be processed due to payload alteration or parsing error)
+  "UNKNOWN_DEGRADATION": { severity: "TRANSIENT", title: "Pipeline/Decoder Anomaly", isBlocking: false },
+  
+  // Severe/Blocking Errors -> Trigger Glassmorphic Blur Modal
+
+  // Expired token/invalid credentials
+  "AUTH_DENIED": { severity: "BLOCKING", title: "Access Key Revoked", isBlocking: true },
+  // Error from OpenSky
+  "DOWNSTREAM_CRASH": { severity: "BLOCKING", title: "OpenSky Network Error", isBlocking: true },
+  // No connection to API
+  "NETWORK_FAULT": { severity: "BLOCKING", title: "Network Interrupted", isBlocking: true },
+  // WebSocket closes unexpectedly (network connection/reboot)
+  "CONNECTION_LOST": { severity: "BLOCKING", title: "WebSocket Disconnected", isBlocking: true },
+  // Unexpected server code error
+  "INTERNAL_SYSTEM_FAULT": { severity: "BLOCKING", title: "Internal Server Error", isBlocking: true },
+};
+
 function App() {
   const [flights, setFlights] = useState([]);
   const flightsCacheRef = useRef({}); // Keep cache of current flight data
@@ -135,6 +159,8 @@ function App() {
 
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isTakingOff, setIsTakingOff] = useState(false);
+
+  const [activeError, setActiveError] = useState(null);
 
   const filteredFlights = searchQuery
     ? flights.filter((f) => f.callsign?.toUpperCase().includes(searchQuery))
@@ -153,6 +179,13 @@ function App() {
         setFlights(event.data.telemetry);
         flightsCacheRef.current = event.data.cache;
       }
+      if (event.data.type === "WORKER_ERROR") {
+        const error_config = ERROR_SEVERITY_MAP.UNKNOWN_DEGRADATION;
+        setActiveError({
+            ...error_config,
+            message: event.data.message,
+          });
+      }
     };
 
     // WebSocket logic wrapper
@@ -165,21 +198,48 @@ function App() {
       ws.onopen = () => {
         console.log("Successful connection to FastApi Websocket server!");
         setIsConnected(true);
+        setActiveError(null);
       };
 
       ws.onmessage = (event) => {
-        const payload = JSON.parse(event.data);
-        if (payload.type === "FLIGHT_DATA" && workerRef.current) {
-          // Offload data parsing to worker thread
-          workerRef.current.postMessage({
-            type: "PROCESS_TELEMETRY",
-            rawData: payload.data,
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.type === "FLIGHT_DATA" && workerRef.current) {
+            setActiveError(null); 
+            // Offload data parsing to worker thread
+            workerRef.current.postMessage({
+              type: "PROCESS_TELEMETRY",
+              rawData: payload.data,
+            });
+          }
+
+          if (payload.type === "SERVER_ERROR") {
+            const errorConfig = ERROR_SEVERITY_MAP[payload.error] || {
+              severity: "TRANSIENT",
+              title: "System Exception",
+              isBlocking: false
+            };
+            setActiveError({
+              ...errorConfig,
+              message: payload.message,
+            });
+          }
+        } catch {
+          const error_config = ERROR_SEVERITY_MAP.UNKNOWN_DEGRADATION;
+          setActiveError({
+            ...error_config,
+            message: "Failed to process downstream data packets.",
           });
         }
       };
 
       ws.onclose = () => {
         console.log("WebSocket closed. Reconnecting in 5 seconds...");
+        const closedConfig = ERROR_SEVERITY_MAP["CONNECTION_LOST"];
+        setActiveError({
+          ...closedConfig,
+          message: "Data stream disconnected. Re-establishing link in 5 seconds...",
+        });
         setIsConnected(false);
         // Retry connection after 5 seconds to allow server to reboot
         setTimeout(() => {
@@ -213,7 +273,8 @@ function App() {
     ? `${filteredFlights.length} of ${flights.length}`
     : `${flights.length}`;
 
-  const isDataLoaded = isConnected && flights.length > 0;
+  // only show plane animation on inital load, if WebSocket disconnects later handle error gracefully with blur modal
+  const isDataLoaded = (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
 
   return (
     <>
@@ -238,9 +299,23 @@ function App() {
             />
           </div>
         </header>
-
+        {activeError && !activeError?.isBlocking && (
+          <div className="error-toast-layer">
+            <div className="pulse-beacon" />
+            <div className="error-toast-content">
+              <span className="error-toast-title">{activeError.title}:</span>
+              <span className="error-toast-message">{activeError.message}</span>
+            </div>
+            <button
+              className="error-toast-dismiss"
+              onClick={() => setActiveError(null)}
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div
-          className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"}`}
+          className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${activeError?.isBlocking ? "stale-state" : ""}`}
         >
           <div className="content-left">
             <FlightList flights={filteredFlights} />
@@ -251,6 +326,13 @@ function App() {
               flightsCache={flightsCacheRef}
             />
           </div>
+          {activeError?.isBlocking && (
+          <div className="glass-recovery-modal">
+            <div className="pulse-beacon" />
+            <h3 className="modal-title">{activeError.title}</h3>
+            <p className="modal-message">{activeError.message}</p>
+          </div>
+        )}
         </div>
         {!isAnimationComplete && (
           <PlaneLoader
