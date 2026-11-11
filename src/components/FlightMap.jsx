@@ -34,7 +34,7 @@ const createTooltipContent = (flight, heading) => {
             <div>Ground Speed: <span style="color: #e2e8f0;">${velocity} mph</span></div>
             <div>Altitude: <span style="color: #e2e8f0;">${altitude} ft</span></div>
             <div>Heading: <span style="color: #e2e8f0;">${heading}°</span></div>
-            <div style="font-size: 10px; margin-top: 4px; font-style: italic;">
+            <div style="font-size: 10px; margin-top: 4px;">
               <a href=${flightRouteLink} target="_blank" rel="noopener noreferrer" class="flight-route-link">
                 See Route on FlightAware
               </a>

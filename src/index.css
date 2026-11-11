@@ -98,15 +98,15 @@ body {
   border-top-color: #1e293b;
 }
 
-/* additional tooltip styles */
 .flight-route-link {
-  color: #94a3b8;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.5);
+  color: #f8fafc;
   outline: none;
   text-decoration: none;
+  transition: border-color 200ms ease, color 200ms ease;
 }
 
 .flight-route-link:hover {
-  color: #fff;
-  outline: none;
-  text-decoration: none;
+  border-bottom-color: #38bdf8;
+  color: #38bdf8;
 }

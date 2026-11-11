@@ -147,7 +147,8 @@ function App() {
     const connectWebSocket = () => {
       console.log("Connecting to FastApi Websocket server...");
       // Open Websocker connection to BE
-      const ws = new WebSocket("ws://localhost:8000/ws");
+      const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws";
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -257,7 +258,7 @@ function App() {
     (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
 
   const isHomePage = currentPage === "";
-  console.log(currentPage)
+
   return (
     <>
       <div className="app-wrapper">
@@ -268,7 +269,7 @@ function App() {
                 className="pg-link"
                 href="#"
               >
-                SkyTracker Ingestion Engine
+                ProjectHorizon
               </a>
               {` (${flightCount} Total Flights)`}
             </h1>
@@ -281,7 +282,7 @@ function App() {
               </a>
             </nav>
             <SearchBar
-              disabled={activeError && activeError?.isBlocking}
+              disabled={!isHomePage || (activeError && activeError?.isBlocking)}
               value={searchQuery}
               onChange={setSearchQuery}
               onClear={() => setSearchQuery("")}

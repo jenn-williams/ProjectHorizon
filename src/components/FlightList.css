@@ -1,7 +1,13 @@
 .flight-list-container {
     height: 100%;
     overflow: auto;
+    scrollbar-width: none;
     width: 100%;
+    -ms-overflow-style: none; 
+}
+
+.flight-list-container::-webkit-scrollbar {
+  display: none;
 }
 
 .flight-list-container.empty {
