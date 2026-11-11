@@ -52,7 +52,7 @@ export default function FlightList({ flights }) {
                 data-index={virtualRow.index}
                 className=""
                 style={{
-                  border: "1px solid #eee",
+                  border: "1px solid #94a3b8",
                   left: 0,
                   position: "absolute",
                   top: 0,

@@ -18,13 +18,13 @@
 .flight-title {
     display: flex;
     align-items: center;
-    color: #fff;
+    color: #f8fafc;
     font-weight: bold;
     padding: 5px 0 0 5px;
 }
 
 .flight-info {
-    color: #6b7280;
+    color: #cbd5e1;
     font-size: 0.6rem;
     padding-left: 10px;
 }

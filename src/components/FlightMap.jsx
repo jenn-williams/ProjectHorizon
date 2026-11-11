@@ -25,7 +25,7 @@ const createTooltipContent = (flight, heading) => {
   const altitude = metersToFeet(flight.altitude || 0);
   const velocity = metersPerSecToMph(flight.velocity || 0);
 
-  const flightRouteLink = flight.callsign
+  const flightRouteLink = flight.callsign && flight.callsign !== "UNKNOWN"
     ? `https://www.flightaware.com/live/flight/${flight.callsign}`
     : "https://www.flightaware.com";
 
@@ -34,15 +34,15 @@ const createTooltipContent = (flight, heading) => {
     <div class="flight-tooltip-content">
       <div class="flight-tooltip-header">
         <div class="flight-tooltip-title">
-          <img style="" src="./light_plane.png" alt="Plane" />
+          <img src="./light_plane.png" alt="Plane" />
           <span>${flight.callsign || "UNKNOWN"}</span>
         </div>
         <span class="flight-tooltip-title-right" style="">${flight.icao24.toUpperCase()}</span>
       </div>
       <div class="flight-tooltip-details">
         <div>Ground Speed: <span>${velocity} mph</span></div>
-        <div>Altitude: <span">${altitude} ft</span></div>
-        <div>Heading: <span">${heading}°</span></div>
+        <div>Altitude: <span>${altitude} ft</span></div>
+        <div>Heading: <span>${heading}°</span></div>
         <div class="flight-route-container">
           <a href=${flightRouteLink} target="_blank" rel="noopener noreferrer" class="flight-route-link">
             See Route on FlightAware
