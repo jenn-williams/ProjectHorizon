@@ -316,6 +316,7 @@ function App() {
                 <FlightMap
                   flights={filteredFlights}
                   flightsCache={flightsCacheRef}
+                  searchQuery={searchQuery}
                 />
               </div>
               {activeError?.isBlocking && (

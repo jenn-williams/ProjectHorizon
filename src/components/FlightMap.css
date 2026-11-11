@@ -1,0 +1,117 @@
+/* Overwrites MapLibre's default styles */
+.flight-tooltip>.maplibregl-popup-content {
+  background: #1e293b;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: "Montserrat", Arial, sans-serif;
+  padding: 10px;
+  min-width: 170px;
+}
+
+.flight-tooltip>.maplibregl-popup-tip {
+  border: 6px solid transparent;
+}
+
+/* Colors the little structural tip anchor arrow pointing at your marker */
+.flight-tooltip.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-top-left .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
+
+.flight-tooltip.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+}
+
+.flight-tooltip-content {
+    background: #1e293b;
+    border-radius: 4px;
+    color: #fff;
+    font-family: "Montserrat", sans-serif;
+    padding: 0 4px 4px 4px;
+}
+
+.flight-tooltip-header {
+    border-bottom: 1px solid #475569;
+    display: flex;
+    font-size: 14px;
+    font-weight: bold;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+}
+
+.flight-tooltip-title {
+    align-items: center;
+    display: flex;
+}
+
+.flight-tooltip-title>img {
+    height: 20px;
+    padding: 5px;
+    rotate: 45deg;
+    width: 20px;
+}
+
+.flight-tooltip-title>span {
+    color: #fff;
+}
+
+.flight-tooltip-title-right {
+    align-items: center;
+    color: #38bdf8;
+    display: flex;
+    font-size: 11px;
+    text-align: center;
+}
+
+.flight-tooltip-details {
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.flight-tooltip-details>div>span {
+    color: #e2e8f0;
+}
+
+.flight-route-container {
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.flight-route-link {
+  border-bottom: 1px solid rgba(56, 189, 248, 0.5);
+  color: #f8fafc;
+  outline: none;
+  text-decoration: none;
+  transition: border-color 200ms ease, color 200ms ease;
+}
+
+.flight-route-link:hover {
+  border-bottom-color: #38bdf8;
+  color: #38bdf8;
+}

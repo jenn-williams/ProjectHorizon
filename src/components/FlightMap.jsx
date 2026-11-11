@@ -5,7 +5,16 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { metersPerSecToMph, metersToFeet } from "../utils";
 
+import './FlightMap.css';
+
 const imagePath = `${import.meta.env.BASE_URL}plane_outline.png`;
+
+const GLOBAL_VIEW = {
+  center: [-98.5795, 39.8283], // Default center (e.g., North America or Atlantic)
+  zoom: 2.2,
+  pitch: 0,
+  bearing: 0,
+};
 
 // Function to update flight location and heading
 function updateFlightTelemetry(flightMarker, newLngLat, newHeading) {
@@ -18,33 +27,35 @@ const createTooltipContent = (flight, heading) => {
   const altitude = metersToFeet(flight.altitude || 0);
   const velocity = metersPerSecToMph(flight.velocity || 0);
 
-  const flightRouteLink = flight.callsign ? `https://www.flightaware.com/live/flight/${flight.callsign}` : 'https://www.flightaware.com';
+  const flightRouteLink = flight.callsign
+    ? `https://www.flightaware.com/live/flight/${flight.callsign}`
+    : "https://www.flightaware.com";
 
   // Tooltip content
   return `
-        <div style="font-family: "Montserrat", sans-serif; padding: 0 4px 4px 4px; color: #fff; background: #1e293b; border-radius: 4px;">
-          <div style="font-weight: bold; font-size: 14px; border-bottom: 1px solid #475569; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
-            <div style="align-items: center; display: flex">
-              <img style="height: 20px; rotate: 45deg; padding: 5px; width: 20px;" src="./light_plane.png" alt="Plane" />
-              <span style="color: #fff;">${flight.callsign || "UNKNOWN"}</span>
-            </div>
-            <span style="align-items: center; color: #38bdf8; display: flex; font-size: 11px; text-align: center;">${flight.icao24.toUpperCase()}</span>
-          </div>
-          <div style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
-            <div>Ground Speed: <span style="color: #e2e8f0;">${velocity} mph</span></div>
-            <div>Altitude: <span style="color: #e2e8f0;">${altitude} ft</span></div>
-            <div>Heading: <span style="color: #e2e8f0;">${heading}°</span></div>
-            <div style="font-size: 10px; margin-top: 4px;">
-              <a href=${flightRouteLink} target="_blank" rel="noopener noreferrer" class="flight-route-link">
-                See Route on FlightAware
-              </a>
-            </div>
-          </div>
+    <div class="flight-tooltip-content">
+      <div class="flight-tooltip-header">
+        <div class="flight-tooltip-title">
+          <img style="" src="./light_plane.png" alt="Plane" />
+          <span>${flight.callsign || "UNKNOWN"}</span>
         </div>
-      `;
-};;
+        <span class="flight-tooltip-title-right" style="">${flight.icao24.toUpperCase()}</span>
+      </div>
+      <div class="flight-tooltip-details">
+        <div>Ground Speed: <span>${velocity} mph</span></div>
+        <div>Altitude: <span">${altitude} ft</span></div>
+        <div>Heading: <span">${heading}°</span></div>
+        <div class="flight-route-container">
+          <a href=${flightRouteLink} target="_blank" rel="noopener noreferrer" class="flight-route-link">
+            See Route on FlightAware
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+};
 
-export default function LiveMap({ flights, flightsCache }) {
+export default function LiveMap({ flights, flightsCache, searchQuery }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -204,6 +215,43 @@ export default function LiveMap({ flights, flightsCache }) {
       }
     });
   }, [flights, isMapReady]);
+
+  // Trigger zoom-out when a user clears the search bar
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (searchQuery === "") {
+      map.flyTo({
+        ...GLOBAL_VIEW,
+        duration: 1800, // 1.8 seconds for a smooth glide out
+        curve: 1.42, // Controls the parabolic "zoom-out" arc height
+        essential: true, // Ensures animation plays
+      });
+    }
+  }, [searchQuery]);
+
+  // Auto-frame filtered results when typing in the search bar
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !searchQuery || flights.length === 0) return;
+
+    // Build a bounding box covering all currently matching aircraft
+    const bounds = new maplibregl.LngLatBounds();
+    flights.forEach((flight) => {
+      if (flight.longitude && flight.latitude) {
+        bounds.extend([flight.longitude, flight.latitude]);
+      }
+    });
+
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, {
+        padding: 80, // Leave room around the outer markers
+        maxZoom: 7, // Prevents zooming in too aggressively on a single plane
+        duration: 1200,
+      });
+    }
+  }, [searchQuery, flights]);
 
   return (
     <div
