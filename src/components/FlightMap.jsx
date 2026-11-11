@@ -5,12 +5,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { metersPerSecToMph, metersToFeet } from "../utils";
 
-import './FlightMap.css';
-
-const imagePath = `${import.meta.env.BASE_URL}plane_outline.png`;
+import "./FlightMap.css";
 
 const GLOBAL_VIEW = {
-  center: [-98.5795, 39.8283], // Default center (e.g., North America or Atlantic)
+  center: [-98.5795, 39.8283], // Default center (North America)
   zoom: 2.2,
   pitch: 0,
   bearing: 0,
@@ -63,6 +61,7 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
 
   const activeFlightIdRef = useRef(null); // Keep clicked flight ID in memory for tooltip updates
   const [isMapReady, setIsMapReady] = useState(false);
+  const prevSearchQueryRef = useRef(searchQuery);
 
   // Mount the maplibregl container canvas once on initial load
   useEffect(() => {
@@ -74,9 +73,15 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
     // Initialize map
     mapRef.current = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: "https://tiles.openfreemap.org/styles/bright", // OpenFreeMap © OpenMapTiles Data from OpenStreetMap
+      style: "https://tiles.openfreemap.org/styles/positron", // liberty OpenFreeMap © OpenMapTiles Data from OpenStreetMap
       center: [-98.5795, 39.8283], // Center over North America by default
       zoom: 3,
+      maxZoom: 12,
+      fadeDuration: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
+      pixelRatio: Math.min(window.devicePixelRatio, 1.5), // Cuts Retina GPU fill-rate load in half
+      antialias: false, // Removes expensive multi-sample anti-aliasing passes on full-screen WebGL
     });
 
     // Initialize one reusable tooltip
@@ -137,9 +142,6 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
   useEffect(() => {
     if (!mapRef.current || !isMapReady) return;
 
-    // force canvas to sync with physical DOM container
-    mapRef.current.resize();
-
     const currentBatchIds = new Set();
 
     flights.forEach((flight) => {
@@ -161,7 +163,7 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
           ? Math.round(flight.heading || 0)
           : 0;
 
-      // if marker exists, update coordinates and heading without destroying DOM node
+      // If marker exists, update coordinates and heading without destroying DOM node
       if (markersRef.current[icao24]) {
         updateFlightTelemetry(markersRef.current[icao24], [lng, lat], heading);
         // If this specific plane is currently tracked, update its tooltip position
@@ -182,11 +184,6 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
         outerEl.setAttribute("data-flight-id", icao24);
         const innerEl = document.createElement("div");
         innerEl.className = "flight-marker";
-        innerEl.style.width = "25px";
-        innerEl.style.height = "25px";
-        innerEl.style.backgroundImage = `url("${imagePath}")`;
-        innerEl.style.backgroundSize = "contain";
-        innerEl.style.cursor = "pointer";
 
         outerEl.appendChild(innerEl);
 
@@ -219,14 +216,18 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
   // Trigger zoom-out when a user clears the search bar
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    const hadPreviousSearch = prevSearchQueryRef.current.trim() !== "";
 
-    if (searchQuery === "") {
+    // Update ref for the next render
+    prevSearchQueryRef.current = searchQuery;
+
+    // Only zoom out if the user actually cleared a previous search
+    if (map && hadPreviousSearch && searchQuery === "") {
       map.flyTo({
         ...GLOBAL_VIEW,
-        duration: 1800, // 1.8 seconds for a smooth glide out
-        curve: 1.42, // Controls the parabolic "zoom-out" arc height
-        essential: true, // Ensures animation plays
+        duration: 1800,
+        curve: 1.42,
+        essential: true,
       });
     }
   }, [searchQuery]);
@@ -251,7 +252,8 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
         duration: 1200,
       });
     }
-  }, [searchQuery, flights]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // REMOVED 'flights' here so background updates never interrupt drags
 
   return (
     <div

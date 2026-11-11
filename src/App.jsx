@@ -253,7 +253,12 @@ function App() {
     ? `${filteredFlights.length} of ${flights.length}`
     : `${flights.length}`;
 
-  // only show plane animation on inital load, if WebSocket disconnects later handle error gracefully with blur modal
+  // Defer rendering full flight data so animation can complete smoothly
+  const visibleMapFlights = isAnimationComplete
+    ? filteredFlights
+    : filteredFlights.slice(0, 1000);
+
+  // Only show plane animation on inital load, if WebSocket disconnects later handle error gracefully with blur modal
   const isDataLoaded =
     (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
 
@@ -314,7 +319,7 @@ function App() {
               </div>
               <div className="content-right">
                 <FlightMap
-                  flights={filteredFlights}
+                  flights={visibleMapFlights}
                   flightsCache={flightsCacheRef}
                   searchQuery={searchQuery}
                 />

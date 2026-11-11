@@ -7,9 +7,19 @@ export default function PerfMonitor() {
 
   useEffect(() => {
     let animationFrameId;
-
+    frameCountRef.current = 0;
     // Set the initial non-idempotent time safely outside of the render thread
     lastTimeRef.current = performance.now();
+
+    // Reset counters when switching tabs so idle time doesn't skew the reading
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        lastTimeRef.current = performance.now();
+        frameCountRef.current = 0;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const loop = () => {
       frameCountRef.current += 1;
@@ -28,7 +38,10 @@ export default function PerfMonitor() {
 
     animationFrameId = requestAnimationFrame(loop);
 
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   // Determine health color threshold indicators

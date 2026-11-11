@@ -24,7 +24,7 @@ export default function PlaneLoader({ isReady, onBreakoutStart, onTransitionComp
       // before unmounting the element completely from the layout tree.
       const unmountTimer = setTimeout(() => {
         onTransitionComplete();
-      }, 5500);
+      }, 900);
 
       return () => {
         clearTimeout(transitionStartTimer);
@@ -36,6 +36,16 @@ export default function PlaneLoader({ isReady, onBreakoutStart, onTransitionComp
   return (
     <div className={`loader-backdrop ${backdropFade ? "fade-out" : ""}`}>
       <div className="flight-universe">
+        <div className="loader-stage">
+          <div
+            className={`loader-title-group ${exitTriggered ? "title-fade-out" : ""}`}
+          >
+            <h1 className="loader-title">ProjectHorizon</h1>
+            <span className="loader-subtitle">
+              Connecting to live flights...
+            </span>
+          </div>
+        </div>
         <div className="flight-zone">
           <div>
             <div className={`flight-container`}>

@@ -115,3 +115,16 @@
   border-bottom-color: #38bdf8;
   color: #38bdf8;
 }
+
+.marker-wrapper {
+  contain: layout style; /* Isolates marker layout calculations from the rest of the page */
+}
+
+.flight-marker {
+  width: 25px;
+  height: 25px;
+  background-image: url("/plane_outline.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
