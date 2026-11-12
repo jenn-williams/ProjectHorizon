@@ -46,60 +46,15 @@ const SearchBar = memo(({ disabled, onChange, onClear, value }) => {
 
 SearchBar.displayName = "SearchBar";
 
-const ERROR_SEVERITY_MAP = {
-  // Minor/Transient Errors -> Trigger Toast Notice
-
-  // Hit daily credit limit
-  RATE_LIMITED: {
-    severity: "TRANSIENT",
-    title: "Rate Limit Exceeded",
-    isBlocking: false,
-  },
-  // Error with API request params
-  INVALID_CONSTRAINTS: {
-    severity: "TRANSIENT",
-    title: "API Validation Error",
-    isBlocking: false,
-  },
-  // Data cannot be read (pipeline cannot be processed due to payload alteration or parsing error)
-  UNKNOWN_DEGRADATION: {
-    severity: "TRANSIENT",
-    title: "Pipeline/Decoder Anomaly",
-    isBlocking: false,
-  },
-
-  // Severe/Blocking Errors -> Trigger Glassmorphic Blur Modal
-
-  // Expired token/invalid credentials
-  AUTH_DENIED: {
-    severity: "BLOCKING",
-    title: "Access Key Revoked",
-    isBlocking: true,
-  },
-  // Error from OpenSky
-  DOWNSTREAM_CRASH: {
-    severity: "BLOCKING",
-    title: "OpenSky Network Error",
-    isBlocking: true,
-  },
-  // No connection to API
-  NETWORK_FAULT: {
-    severity: "BLOCKING",
-    title: "Network Interrupted",
-    isBlocking: true,
-  },
-  // WebSocket closes unexpectedly (network connection/reboot)
-  CONNECTION_LOST: {
-    severity: "BLOCKING",
-    title: "WebSocket Disconnected",
-    isBlocking: true,
-  },
-  // Unexpected server code error
-  INTERNAL_SYSTEM_FAULT: {
-    severity: "BLOCKING",
-    title: "Internal Server Error",
-    isBlocking: true,
-  },
+const ERROR_TITLES = {
+  RATE_LIMITED: "Rate Limit Exceeded",
+  INVALID_CONSTRAINTS: "API Validation Error",
+  UNKNOWN_DEGRADATION: "Data Stream Anomaly",
+  AUTH_DENIED: "Authentication Error",
+  DOWNSTREAM_CRASH: "OpenSky Service Unavailable",
+  NETWORK_FAULT: "Network Interrupted",
+  CONNECTION_LOST: "Data stream disconnected",
+  INTERNAL_SYSTEM_FAULT: "Server Error",
 };
 
 function App() {
@@ -114,6 +69,7 @@ function App() {
   const [isTakingOff, setIsTakingOff] = useState(false);
 
   const [activeError, setActiveError] = useState(null);
+  const isBlockingError = Boolean(activeError && flights.length === 0);
 
   const [currentPage, setCurrentPage] = useState("");
 
@@ -130,14 +86,15 @@ function App() {
 
     // Listen for processed data from worker
     workerRef.current.onmessage = (event) => {
+      console.log(event.data.type);
       if (event.data.type === "DATA_PROCESSED") {
         setFlights(event.data.telemetry);
         flightsCacheRef.current = event.data.cache;
       }
       if (event.data.type === "WORKER_ERROR") {
-        const error_config = ERROR_SEVERITY_MAP.UNKNOWN_DEGRADATION;
         setActiveError({
-          ...error_config,
+          title:
+            ERROR_TITLES[event.data.error] || ERROR_TITLES.UNKNOWN_DEGRADATION,
           message: event.data.message,
         });
       }
@@ -170,20 +127,14 @@ function App() {
           }
 
           if (payload.type === "SERVER_ERROR") {
-            const errorConfig = ERROR_SEVERITY_MAP[payload.error] || {
-              severity: "TRANSIENT",
-              title: "System Exception",
-              isBlocking: false,
-            };
             setActiveError({
-              ...errorConfig,
+              title: ERROR_TITLES[payload.error] || "System Exception",
               message: payload.message,
             });
           }
         } catch {
-          const error_config = ERROR_SEVERITY_MAP.UNKNOWN_DEGRADATION;
           setActiveError({
-            ...error_config,
+            title: ERROR_TITLES.UNKNOWN_DEGRADATION,
             message: "Failed to process downstream data packets.",
           });
         }
@@ -191,11 +142,9 @@ function App() {
 
       ws.onclose = () => {
         console.log("WebSocket closed. Reconnecting in 5 seconds...");
-        const closedConfig = ERROR_SEVERITY_MAP["CONNECTION_LOST"];
         setActiveError({
-          ...closedConfig,
-          message:
-            "Data stream disconnected. Re-establishing link in 5 seconds...",
+          title: ERROR_TITLES.CONNECTION_LOST,
+          message: "Re-establishing link in 5 seconds...",
         });
         setIsConnected(false);
         // Retry connection after 5 seconds to allow server to reboot
@@ -228,26 +177,26 @@ function App() {
 
   // Navigation
   useEffect(() => {
-  // Function to sync component state with the URL hash location
-  const handleHashChange = () => {
-    const hash = window.location.hash;
-    if (hash === "#about") {
-      setCurrentPage("about");
-    } else {
-      setCurrentPage(""); // Fallback to your main dashboard tracking view
-    }
-  };
+    // Function to sync component state with the URL hash location
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === "#about") {
+        setCurrentPage("about");
+      } else {
+        setCurrentPage(""); // Fallback to main page
+      }
+    };
 
-  // Run on initial mount to catch a direct link (e.g. ://yoursite.com)
-  handleHashChange();
+    // Run on initial mount to catch a direct link (e.g. ://yoursite.com)
+    handleHashChange();
 
-  // Listen for browser Back/Forward navigation shifts
-  window.addEventListener("hashchange", handleHashChange);
-  
-  return () => {
-    window.removeEventListener("hashchange", handleHashChange);
-  };
-}, []);
+    // Listen for browser Back/Forward navigation shifts
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
 
   const flightCount = searchQuery
     ? `${filteredFlights.length} of ${flights.length}`
@@ -258,9 +207,10 @@ function App() {
     ? filteredFlights
     : filteredFlights.slice(0, 1000);
 
-  // Only show plane animation on inital load, if WebSocket disconnects later handle error gracefully with blur modal
-  const isDataLoaded =
-    (isConnected && flights.length > 0) || (!isConnected && activeError?.title);
+  // Any initial error exits to blur modal, subsequent errors will enter blur modal as well
+  const isDataLoaded = Boolean(
+    (isConnected && flights.length > 0) || Boolean(activeError),
+  );
 
   const isHomePage = currentPage === "";
 
@@ -270,10 +220,7 @@ function App() {
         <header className="app-bar">
           <div className="header-left">
             <h1 className="header-title">
-              <a
-                className="pg-link"
-                href="#"
-              >
+              <a className="pg-link" href="#">
                 ProjectHorizon
               </a>
               {` (${flightCount} Total Flights)`}
@@ -287,32 +234,17 @@ function App() {
               </a>
             </nav>
             <SearchBar
-              disabled={!isHomePage || (activeError && activeError?.isBlocking)}
+              disabled={!isHomePage || (activeError && isBlockingError)}
               value={searchQuery}
               onChange={setSearchQuery}
               onClear={() => setSearchQuery("")}
             />
           </div>
         </header>
-        {activeError && !activeError?.isBlocking && (
-          <div className="error-toast-layer">
-            <div className="pulse-beacon" />
-            <div className="error-toast-content">
-              <span className="error-toast-title">{activeError.title}:</span>
-              <span className="error-toast-message">{activeError.message}</span>
-            </div>
-            <button
-              className="error-toast-dismiss"
-              onClick={() => setActiveError(null)}
-            >
-              x
-            </button>
-          </div>
-        )}
         {isHomePage && (
           <>
             <div
-              className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${activeError?.isBlocking ? "stale-state" : ""}`}
+              className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${isBlockingError ? "stale-state" : ""}`}
             >
               <div className="content-left">
                 <FlightList flights={filteredFlights} />
@@ -324,7 +256,26 @@ function App() {
                   searchQuery={searchQuery}
                 />
               </div>
-              {activeError?.isBlocking && (
+              {activeError && !isBlockingError && (
+                <div className="error-toast-layer">
+                  <div className="pulse-beacon" />
+                  <div className="error-toast-content">
+                    <span className="error-toast-title">
+                      {`Showing cached data · ${activeError.title}`}:
+                    </span>
+                    <span className="error-toast-message">
+                      {activeError.message}
+                    </span>
+                  </div>
+                  <button
+                    className="error-toast-dismiss"
+                    onClick={() => setActiveError(null)}
+                  >
+                    x
+                  </button>
+                </div>
+              )}
+              {isBlockingError && (
                 <div className="glass-recovery-modal">
                   <div className="pulse-beacon" />
                   <h3 className="modal-title">{activeError.title}</h3>
