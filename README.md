@@ -2,6 +2,8 @@
 
 A real-time global flight tracking dashboard built with **React**, **MapLibre GL**, and **FastAPI**. Designed to stream, process, and render thousands of live aircraft locations at **60+ FPS** while keeping the user interface fast and responsive.
 
+* 🔗 **[Live Demo](https://jenn-williams.github.io/ProjectHorizon/)** *(Hosted on GitHub Pages + Fly.io)*
+
 ---
 
 ## 🏗️ System Architecture & Key Optimizations
