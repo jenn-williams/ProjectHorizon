@@ -13,7 +13,7 @@
   border: 6px solid transparent;
 }
 
-/* Colors the little structural tip anchor arrow pointing at your marker */
+/* Colors the little structural tip anchor arrow pointing at marker */
 .flight-tooltip.maplibregl-popup-anchor-top .maplibregl-popup-tip {
   border-bottom-color: #1e293b;
 }

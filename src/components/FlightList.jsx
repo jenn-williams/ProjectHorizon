@@ -48,7 +48,7 @@ export default function FlightList({ flights }) {
             flight && (
               <div
                 key={virtualRow.index}
-                ref={rowVirtualizer.measureElement}
+                ref={rowVirtualizer.measureElement} // Allows responsiveness, row height will increase when text wraps
                 data-index={virtualRow.index}
                 className=""
                 style={{
