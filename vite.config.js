@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   base: '/ProjectHorizon/',
   build: {
-    // Automatically extracts all bundled dependency licenses into dist/.vite/license.md
-    license: true,
+    license: {
+      fileName: 'THIRD-PARTY-LICENSES.txt'
+    }
   },
-})
+});
