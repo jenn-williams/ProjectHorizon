@@ -86,7 +86,6 @@ function App() {
 
     // Listen for processed data from worker
     workerRef.current.onmessage = (event) => {
-      console.log(event.data.type);
       if (event.data.type === "DATA_PROCESSED") {
         setFlights(event.data.telemetry);
         flightsCacheRef.current = event.data.cache;
