@@ -77,9 +77,9 @@ export default function LiveMap({ flights, flightsCache, searchQuery }) {
       center: [-98.5795, 39.8283], // Center over North America by default
       zoom: 3,
       maxZoom: 12,
-      fadeDuration: 0,
-      dragRotate: false,
-      pitchWithRotate: false,
+      fadeDuration: 0, // Make map labels appear instantly (no blending) during zoom 
+      dragRotate: false, // Disables map rotation
+      pitchWithRotate: false, // Locks 2D tilt angle
       pixelRatio: Math.min(window.devicePixelRatio, 1.5), // Cuts Retina GPU fill-rate load in half
       antialias: false, // Removes expensive multi-sample anti-aliasing passes on full-screen WebGL
     });

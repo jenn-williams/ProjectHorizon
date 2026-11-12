@@ -1,6 +1,5 @@
 /* Page & App Bar */
 .app-wrapper {
-    /* box-sizing: border-box; */
     display: flex;
     flex-direction: column;
     font-family: "Montserrat", Arial, sans-serif;

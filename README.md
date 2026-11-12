@@ -12,6 +12,7 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 
 ### 1. Background Data Processing (Web Workers)
 * **Compact Data Streaming:** Receives raw flight data arrays directly from the OpenSky Network API over a persistent WebSocket connection to keep network payloads small.
+* **Data Filtering:** Automatically removes incomplete flight records missing required coordinates (like latitude or longitude) or callsign/ICAO24 code before rendering to prevent map errors.
 * **Smooth 60+ FPS Rendering:** Moves JSON parsing and data indexing into a background **Web Worker** (`dataProcessor.worker.js`). This keeps the main browser thread free for smooth map panning, custom marker rotations, and virtualized list scrolling (`@tanstack/react-virtual`).
 
 ### 2. Reliable WebSocket Management

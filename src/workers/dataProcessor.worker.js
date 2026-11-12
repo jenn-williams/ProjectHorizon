@@ -20,7 +20,7 @@ self.onmessage = (event) => {
           heading: flight[10] || null, // True track in decimal degrees clockwise from north (north=0°). Can be null.
           category: flight[17], // Aircraft category, integer 0 - 20 or undefined
         }))
-        .filter((f) => f.icao24 && f.longitude && f.latitude); // Make sure that only flights with valid coordinates and ICAO are included.
+        .filter((f) => f.icao24 && f.callsign !== "UNKNOWN" && f.longitude && f.latitude); // Make sure that only flights with valid coordinates and ICAO are included.
 
       const dataCache = {}; // Create object using flight ID as key
       formattedData.forEach((flight) => {
