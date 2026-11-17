@@ -1,0 +1,95 @@
+.arch-diagram-wrapper {
+  margin: 40px 0;
+  width: 100%;
+  font-family: monospace;
+}
+
+.arch-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+/* Typography inside SVG */
+.group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  fill: #94a3b8;
+}
+
+.node-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  fill: #64748b;
+}
+
+.node-title {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #f8fafc;
+}
+
+.node-sub {
+  font-size: 10.5px;
+  fill: #94a3b8;
+}
+
+.badge-cyan {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  fill: #38bdf8;
+}
+
+.badge-indigo {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  fill: #a5b4fc;
+}
+
+.boundary-tag {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  fill: #64748b;
+}
+
+.edge-label {
+  font-size: 8.5px;
+  font-weight: 500;
+  fill: #64748b;
+}
+
+.edge-label-highlight {
+  font-size: 9px;
+  font-weight: 600;
+  fill: #38bdf8;
+}
+
+/* Animated Telemetry Pulses */
+.flow-line-fast {
+  stroke-dasharray: 8 6;
+  animation: dashFlow 900ms linear infinite;
+}
+
+.flow-line-slow {
+  stroke-dasharray: 6 6;
+  animation: dashFlow 1800ms linear infinite;
+}
+
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.arch-caption {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+}

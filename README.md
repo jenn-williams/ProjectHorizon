@@ -38,6 +38,42 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 * **HTTP & Validation:** `httpx`, `requests`, Pydantic v2
 * **Hosting:** Fly.io (Containerized Linux VM)
 
+
+**Architecture Diagram**
+
++-------------------+       HTTPS (10s Poll)      +---------------------------------------+
+
+|  OpenSky Network  | --------------------------> |         FastAPI Backend Server        |
+|     REST API      |                             |  +---------------------------------+  |
++-------------------+                             |  | Rate-Limit Cache                |  |
+
+                                                  |  +----------------+----------------+  |
+                                                  |                   |                   |
+                                                  |  +----------------v----------------+  |
+                                                  |  |   API Error & Status Mapper     |  |
+                                                  |  +----------------+----------------+  |
+                                                  |                   |                   |
+                                                  |  +----------------v----------------+  |
+                                                  |  |  WebSocket ConnectionManager    |  |
+                                                  |  +----------------+----------------+  |
+                                                  +-------------------|-------------------+
+                                                                      |
+                                                       Persistent WebSocket (<100ms)
+                                                                      |
++---------------------------------------------------------------------v-------------------+
+
+|                                  React Browser Client                                   |
+|                                                                                         |
+|  +---------------------------------------+     +-------------------------------------+  |
+|  |         Off-Thread Web Worker         |     |        Main UI Thread (120Hz)       |  |
+|  |                                       |     |                                     |  |
+|  |  * Parses raw ADS-B state vectors     | --> |  * MapLibre GL WebGL Canvas         |  |
+|  |  * Formats data                       |     |  * TanStack Virtualized List        |  |
+|  |  * Creates search cache               |     |  * Hybrid Error Blur / Toast UI     |  |
+|  +---------------------------------------+     +-------------------------------------+  |
++-----------------------------------------------------------------------------------------+
+
+
 ---
 
 ## 🌐 Deployment & Architecture Note
