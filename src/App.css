@@ -329,7 +329,7 @@ input::placeholder {
     text-align: center;
     opacity: 1;
     transition: opacity 700ms ease-out 750ms, transform 700ms ease-out 750ms;
-    transform: translate(-40px, 0);
+    transform: translate(-55px, 0);
     z-index: 10;
 }
 

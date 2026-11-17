@@ -246,7 +246,7 @@ function App() {
               className={`content-wrapper ${isTakingOff ? "dashboard-reveal" : "dashboard-hidden"} ${isBlockingError ? "stale-state" : ""}`}
             >
               <div className="content-left">
-                <FlightList flights={filteredFlights} />
+                <FlightList flights={filteredFlights} onRowClick={setSearchQuery} />
               </div>
               <div className="content-right">
                 <FlightMap

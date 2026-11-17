@@ -4,7 +4,7 @@ import { metersPerSecToMph, metersToFeet } from "../utils";
 
 import "./FlightList.css";
 
-export default function FlightList({ flights }) {
+export default function FlightList({ flights, onRowClick }) {
   const parentRef = useRef(null);
 
   // List renders correctly, safe to disable lint error
@@ -53,12 +53,14 @@ export default function FlightList({ flights }) {
                 className=""
                 style={{
                   border: "1px solid #94a3b8",
+                  cursor: "pointer",
                   left: 0,
                   position: "absolute",
                   top: 0,
                   transform: `translateY(${virtualRow.start}px)`,
                   width: "100%",
                 }}
+                onClick={() => onRowClick(flight.callsign)}
               >
                 <div className="flight-title">
                   <img className="plane-icon" src="./light_plane.png" alt="Plane" />
