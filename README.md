@@ -4,7 +4,7 @@ A real-time global flight tracking dashboard built with **React**, **MapLibre GL
 
 * 🔗 **[Live Demo](https://jenn-williams.github.io/ProjectHorizon/)** *(Hosted on GitHub Pages + Fly.io)*
 
----
+
 
 ## 🏗️ System Architecture & Key Optimizations
 
@@ -23,7 +23,7 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 * **On-Demand Data Fetching:** Uses a server-side cache driven by timestamp comparisons (`last_fetch_time`) instead of continuous background polling.
 * **Rate-Limit & Resource Protection:** Avoids wasting API credits when no users are active on the site, while delivering cached flight data in under 100ms to new visitors.
 
----
+
 
 ## 🛠️ Tech Stack
 
@@ -41,6 +41,7 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 
 **Architecture Diagram**
 
+```text
 +-------------------+       HTTPS (10s Poll)      +---------------------------------------+
 
 |  OpenSky Network  | --------------------------> |         FastAPI Backend Server        |
@@ -72,16 +73,15 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 |  |  * Creates search cache               |     |  * Hybrid Error Blur / Toast UI     |  |
 |  +---------------------------------------+     +-------------------------------------+  |
 +-----------------------------------------------------------------------------------------+
+```
 
-
----
 
 ## 🌐 Deployment & Architecture Note
 
 * **Frontend:** Hosted on **GitHub Pages** and connects to the live backend telemetry stream via secure WebSockets (`VITE_WS_URL`).
 * **Backend:** The FastAPI server and caching layer are hosted privately on **Fly.io** to protect OpenSky API credentials and manage upstream rate limits.
 
----
+
 
 ## 📊 Data & Map Attributions
 
@@ -90,7 +90,7 @@ Unlike basic polling dashboards that freeze the browser or exceed API rate limit
 * **Map Tile Design:** **© OpenMapTiles**.
 * **Geographic Data:** **© OpenStreetMap contributors**.
 
----
+
 
 ## 📄 Copyright
 
